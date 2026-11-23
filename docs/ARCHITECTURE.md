@@ -167,7 +167,38 @@ missing field names. Nothing is filled in silently.
   taken from the 70% training portion**, never on the 30% test set. The choice and its
   reasoning are written into `coercion_model_card.json`.
 
+### 2.4b Phase 5 additions (decided during implementation)
+
+- **Rules' pressure gate.** Context indicators (new payee, large amount, pasted UPI ID,
+  app switching, share of balance) only count when a pressure indicator fired.
+- **ML pressure gate.** With no pressure indicator, if at least 75% of the coercion
+  model's risk-raising SHAP evidence comes from payee/amount features (including the "do
+  you know this person" answer), the model's concern is not counted
+  (`PAYEE_AMOUNT_ONLY_SHARE`). Together, the two gates guarantee that **an unknown payee or
+  a high amount can never establish coercion on its own**.
+- **Rule revision v2.** This was made on validation evidence after the first test run, and
+  is recorded in the model card:
+  - "Someone is guiding me" is severe only during a call with an unknown number.
+  - The "I know this payee" contradiction is "soft": shown to the user, but it doesn't
+    trigger R4.
+- **Cut-offs come from validation.**
+
+  | Stage | Model | WARN (medium) | HOLD (high) | Rule cap |
+  |---|---|---|---|---|
+  | Pre-pause | RandomForest | 0.170 (recall ≥ 0.90) | 0.699 (precision ≥ 0.90) | 30 |
+  | Post-pause | XGBoost | 0.307 | 0.778 | 27 |
+
+- **Two-stage flow.** Final decision = max(pre-pause, post-pause). Answers can raise a
+  decision but never lower it, because coached victims lie.
+
 ### 2.5 Fusion decision matrix (`fusion/engine.py`)
+
+> Phase 5 changes, all documented in `safepay/fusion/engine.py`:
+> - **R6b:** a new payee plus an amount ≥ 5× the usual, with coercion low, gives
+>   WARN + VERIFY as an "unusual payment check, not a coercion finding".
+> - **Stage rule:** at pre-pause, R3 gives WARN so the questions come first, because the
+>   pre-pause medium band is a screening level chosen for recall. R3's HOLD applies after
+>   the answers.
 
 Rules are checked top to bottom and the first match wins. Afterwards, the split and
 trust adjustments are applied.

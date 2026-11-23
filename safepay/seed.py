@@ -149,7 +149,10 @@ SCENARIOS = [
      ans("no", "no", "job_task_fee"),
      [{"minutes_ago": 180, "amount": 200}, {"minutes_ago": 120, "amount": 500},
       {"minutes_ago": 60, "amount": 1_500}],
-     ["WARN"], "Escalation pattern."),
+     ["WARN", "HOLD"],
+     "Escalation pattern (splitting floor guarantees at least WARN). HOLD accepted: the post-pause model "
+     "scores 0.999, but 'job_task_fee' appears only on coerced rows in the synthetic data, so that score "
+     "is optimistic. With purpose 'other' it is still HOLD (0.963)."),
     (5, "Romance scam",
      "No call, large amount to a new payee, purpose 'family'. The payee scores elevated on the mule model.",
      2, "daniel.m.uk@demoupi", 60_000,

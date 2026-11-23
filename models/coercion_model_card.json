@@ -1,0 +1,1319 @@
+{
+  "generated_at": "2026-11-23T21:37:41+00:00",
+  "data_source": "data\\coercion\\safepay_coercion_synthetic.csv",
+  "caveat": "synthetic data \u2014 feasibility only, not real-world accuracy",
+  "target": "label_coerced",
+  "never_trained_on": [
+    "txn_id",
+    "scam_type",
+    "sample_group",
+    "hard_negative_reason",
+    "label_noisy",
+    "label_coerced"
+  ],
+  "excluded_payee_side": [
+    "payee_vpa_age_days",
+    "payee_prior_complaints"
+  ],
+  "split": {
+    "seed": 42,
+    "train": 14000,
+    "fit": 11200,
+    "validation": 2800,
+    "test": 6000
+  },
+  "selection_rules": "on the validation split (criteria fixed before looking at test):\n    model kind     RandomForest vs XGBoost: higher validation PR-AUC\n    HIGH cut-off   smallest threshold where validation precision >= 0.90 (a HOLD should be\n                   right at least 9 times in 10 on this data)\n    MEDIUM cut-off largest threshold where validation recall >= 0.90 (a WARN should\n                   catch at least 9 in 10 coerced payments)\n    rule cap       smallest integer cap (4-40) for which the combined score keeps\n                   validation precision >= 0.90 at HIGH and does not lower precision at\n                   MEDIUM by more than 0.02 compared with the ML model alone",
+  "rule_revisions": [
+    "v1: initial weights from DATA_CARD evidence.",
+    "v2 (after the first test run, justified on VALIDATION data only): 'someone is guiding me' is severe only while on a call with an unknown number (validation precision 0.83; 0.22 with no call); the know-payee contradiction became 'soft' (validation precision 0.24). The test set was seen once before this revision; model cut-offs were not changed by it."
+  ],
+  "known_artefact": "ans_purpose values govt_fine_verification, refund_cashback and job_task_fee appear only on coerced rows of the synthetic data; post-pause metrics are therefore optimistic. Example: demo scenario 4 (job/task scam) scores 0.999 post-pause with purpose job_task_fee; that score is a synthetic-data artefact and is optimistic. With purpose 'other' it scores 0.963 (purpose 'other' is also over-represented among coerced rows: 36.2% vs a 12.8% base rate).",
+  "stages": {
+    "pre_pause": {
+      "model_kind": "random_forest",
+      "features": [
+        "hour_of_day",
+        "user_age",
+        "account_tenure_months",
+        "avg_txn_amount_90d",
+        "balance_before_txn",
+        "amount_inr",
+        "amount_to_avg_ratio",
+        "amount_pct_of_balance",
+        "payee_is_new",
+        "payee_in_contacts",
+        "on_voice_call",
+        "on_video_call",
+        "call_duration_min",
+        "caller_in_contacts",
+        "caller_is_international",
+        "screen_share_active",
+        "remote_access_app_installed_7d",
+        "session_duration_sec",
+        "hesitation_events",
+        "segmented_typing",
+        "app_switches",
+        "vpa_pasted",
+        "new_payee_txns_24h",
+        "amount_sent_new_payees_24h",
+        "fd_or_loan_liquidated_7d",
+        "payee_type_P2M"
+      ],
+      "n_features": 26,
+      "validation_pr_auc": {
+        "random_forest": 0.8208,
+        "xgboost": 0.8136
+      },
+      "xgboost_available": true,
+      "test_roc_auc": 0.9467,
+      "test_pr_auc": 0.819
+    },
+    "post_pause": {
+      "model_kind": "xgboost",
+      "features": [
+        "hour_of_day",
+        "user_age",
+        "account_tenure_months",
+        "avg_txn_amount_90d",
+        "balance_before_txn",
+        "amount_inr",
+        "amount_to_avg_ratio",
+        "amount_pct_of_balance",
+        "payee_is_new",
+        "payee_in_contacts",
+        "on_voice_call",
+        "on_video_call",
+        "call_duration_min",
+        "caller_in_contacts",
+        "caller_is_international",
+        "screen_share_active",
+        "remote_access_app_installed_7d",
+        "session_duration_sec",
+        "hesitation_events",
+        "segmented_typing",
+        "app_switches",
+        "vpa_pasted",
+        "new_payee_txns_24h",
+        "amount_sent_new_payees_24h",
+        "fd_or_loan_liquidated_7d",
+        "payee_type_P2M",
+        "ans_know_payee_no",
+        "ans_know_payee_unsure",
+        "ans_know_payee_yes",
+        "ans_someone_guiding_no",
+        "ans_someone_guiding_yes",
+        "ans_purpose_bills_shopping",
+        "ans_purpose_family",
+        "ans_purpose_govt_fine_verification",
+        "ans_purpose_investment",
+        "ans_purpose_job_task_fee",
+        "ans_purpose_loan_repayment",
+        "ans_purpose_medical",
+        "ans_purpose_other",
+        "ans_purpose_refund_cashback",
+        "ans_purpose_rent_fees"
+      ],
+      "n_features": 41,
+      "validation_pr_auc": {
+        "random_forest": 0.892,
+        "xgboost": 0.901
+      },
+      "xgboost_available": true,
+      "test_roc_auc": 0.9614,
+      "test_pr_auc": 0.907
+    }
+  },
+  "cutoffs": {
+    "pre_pause": {
+      "medium": 0.1701,
+      "high": 0.699
+    },
+    "post_pause": {
+      "medium": 0.307,
+      "high": 0.7777
+    }
+  },
+  "rule_score_cap": {
+    "pre_pause": 30,
+    "post_pause": 27
+  },
+  "comparison_with_payee_features": {
+    "pre_pause": {
+      "model_kind": "random_forest",
+      "validation_pr_auc": {
+        "random_forest": 0.8487,
+        "xgboost": 0.8475
+      },
+      "cutoffs": {
+        "medium": 0.2247,
+        "high": 0.6694
+      },
+      "test_roc_auc": 0.9513,
+      "test_pr_auc": 0.8503,
+      "test_ml_only": {
+        "warn_or_hold": {
+          "precision": 0.5514,
+          "recall": 0.8987,
+          "f1": 0.6835,
+          "fp_rate": 0.1076,
+          "fp_rate_hard_negatives": 0.3832,
+          "fp_rate_normal": 0.0113,
+          "recall_by_scam_type": {
+            "bank_kyc_impersonation": {
+              "recall": 0.979,
+              "n": 146
+            },
+            "courier_customs": {
+              "recall": 1.0,
+              "n": 56
+            },
+            "digital_arrest": {
+              "recall": 1.0,
+              "n": 97
+            },
+            "family_emergency_voiceclone": {
+              "recall": 1.0,
+              "n": 64
+            },
+            "investment_trading": {
+              "recall": 0.968,
+              "n": 189
+            },
+            "job_task": {
+              "recall": 0.866,
+              "n": 112
+            },
+            "none": {
+              "recall": 0.143,
+              "n": 56
+            },
+            "romance": {
+              "recall": 0.88,
+              "n": 50
+            }
+          },
+          "fp_rate_by_hard_negative": {
+            "family_call_while_paying": {
+              "fp_rate": 0.162,
+              "n": 314
+            },
+            "fd_broken_for_genuine_need": {
+              "fp_rate": 0.508,
+              "n": 128
+            },
+            "first_time_investment_platform": {
+              "fp_rate": 0.338,
+              "n": 222
+            },
+            "large_new_payee_genuine": {
+              "fp_rate": 0.628,
+              "n": 347
+            },
+            "night_urgent_genuine": {
+              "fp_rate": 0.279,
+              "n": 122
+            },
+            "senior_paying_family": {
+              "fp_rate": 0.34,
+              "n": 203
+            }
+          }
+        },
+        "hold": {
+          "precision": 0.9096,
+          "recall": 0.5883,
+          "f1": 0.7145,
+          "fp_rate": 0.0086,
+          "fp_rate_hard_negatives": 0.0292,
+          "fp_rate_normal": 0.0005,
+          "recall_by_scam_type": {
+            "bank_kyc_impersonation": {
+              "recall": 0.767,
+              "n": 146
+            },
+            "courier_customs": {
+              "recall": 0.696,
+              "n": 56
+            },
+            "digital_arrest": {
+              "recall": 0.928,
+              "n": 97
+            },
+            "family_emergency_voiceclone": {
+              "recall": 0.781,
+              "n": 64
+            },
+            "investment_trading": {
+              "recall": 0.444,
+              "n": 189
+            },
+            "job_task": {
+              "recall": 0.464,
+              "n": 112
+            },
+            "none": {
+              "recall": 0.054,
+              "n": 56
+            },
+            "romance": {
+              "recall": 0.46,
+              "n": 50
+            }
+          },
+          "fp_rate_by_hard_negative": {
+            "family_call_while_paying": {
+              "fp_rate": 0.003,
+              "n": 314
+            },
+            "fd_broken_for_genuine_need": {
+              "fp_rate": 0.031,
+              "n": 128
+            },
+            "first_time_investment_platform": {
+              "fp_rate": 0.018,
+              "n": 222
+            },
+            "large_new_payee_genuine": {
+              "fp_rate": 0.084,
+              "n": 347
+            },
+            "night_urgent_genuine": {
+              "fp_rate": 0.008,
+              "n": 122
+            },
+            "senior_paying_family": {
+              "fp_rate": 0.0,
+              "n": 203
+            }
+          }
+        },
+        "band_share": {
+          "low": 0.7908,
+          "medium": 0.1262,
+          "high": 0.083
+        }
+      }
+    },
+    "post_pause": {
+      "model_kind": "xgboost",
+      "validation_pr_auc": {
+        "random_forest": 0.8996,
+        "xgboost": 0.9083
+      },
+      "cutoffs": {
+        "medium": 0.3264,
+        "high": 0.7019
+      },
+      "test_roc_auc": 0.9625,
+      "test_pr_auc": 0.9167,
+      "test_ml_only": {
+        "warn_or_hold": {
+          "precision": 0.7008,
+          "recall": 0.9247,
+          "f1": 0.7973,
+          "fp_rate": 0.0581,
+          "fp_rate_hard_negatives": 0.1984,
+          "fp_rate_normal": 0.0082,
+          "recall_by_scam_type": {
+            "bank_kyc_impersonation": {
+              "recall": 1.0,
+              "n": 146
+            },
+            "courier_customs": {
+              "recall": 1.0,
+              "n": 56
+            },
+            "digital_arrest": {
+              "recall": 1.0,
+              "n": 97
+            },
+            "family_emergency_voiceclone": {
+              "recall": 0.969,
+              "n": 64
+            },
+            "investment_trading": {
+              "recall": 0.984,
+              "n": 189
+            },
+            "job_task": {
+              "recall": 0.991,
+              "n": 112
+            },
+            "none": {
+              "recall": 0.161,
+              "n": 56
+            },
+            "romance": {
+              "recall": 0.9,
+              "n": 50
+            }
+          },
+          "fp_rate_by_hard_negative": {
+            "family_call_while_paying": {
+              "fp_rate": 0.035,
+              "n": 314
+            },
+            "fd_broken_for_genuine_need": {
+              "fp_rate": 0.172,
+              "n": 128
+            },
+            "first_time_investment_platform": {
+              "fp_rate": 0.455,
+              "n": 222
+            },
+            "large_new_payee_genuine": {
+              "fp_rate": 0.256,
+              "n": 347
+            },
+            "night_urgent_genuine": {
+              "fp_rate": 0.098,
+              "n": 122
+            },
+            "senior_paying_family": {
+              "fp_rate": 0.148,
+              "n": 203
+            }
+          }
+        },
+        "hold": {
+          "precision": 0.895,
+          "recall": 0.8416,
+          "f1": 0.8675,
+          "fp_rate": 0.0145,
+          "fp_rate_hard_negatives": 0.0516,
+          "fp_rate_normal": 0.0003,
+          "recall_by_scam_type": {
+            "bank_kyc_impersonation": {
+              "recall": 0.986,
+              "n": 146
+            },
+            "courier_customs": {
+              "recall": 1.0,
+              "n": 56
+            },
+            "digital_arrest": {
+              "recall": 1.0,
+              "n": 97
+            },
+            "family_emergency_voiceclone": {
+              "recall": 0.812,
+              "n": 64
+            },
+            "investment_trading": {
+              "recall": 0.857,
+              "n": 189
+            },
+            "job_task": {
+              "recall": 0.92,
+              "n": 112
+            },
+            "none": {
+              "recall": 0.071,
+              "n": 56
+            },
+            "romance": {
+              "recall": 0.6,
+              "n": 50
+            }
+          },
+          "fp_rate_by_hard_negative": {
+            "family_call_while_paying": {
+              "fp_rate": 0.006,
+              "n": 314
+            },
+            "fd_broken_for_genuine_need": {
+              "fp_rate": 0.07,
+              "n": 128
+            },
+            "first_time_investment_platform": {
+              "fp_rate": 0.117,
+              "n": 222
+            },
+            "large_new_payee_genuine": {
+              "fp_rate": 0.075,
+              "n": 347
+            },
+            "night_urgent_genuine": {
+              "fp_rate": 0.016,
+              "n": 122
+            },
+            "senior_paying_family": {
+              "fp_rate": 0.02,
+              "n": 203
+            }
+          }
+        },
+        "band_share": {
+          "low": 0.8307,
+          "medium": 0.0487,
+          "high": 0.1207
+        }
+      }
+    }
+  },
+  "metrics_test": {
+    "pre_pause": {
+      "ml_only": {
+        "warn_or_hold": {
+          "precision": 0.4682,
+          "recall": 0.9182,
+          "f1": 0.6202,
+          "fp_rate": 0.1535,
+          "fp_rate_hard_negatives": 0.5277,
+          "fp_rate_normal": 0.0234,
+          "recall_by_scam_type": {
+            "bank_kyc_impersonation": {
+              "recall": 0.979,
+              "n": 146
+            },
+            "courier_customs": {
+              "recall": 1.0,
+              "n": 56
+            },
+            "digital_arrest": {
+              "recall": 1.0,
+              "n": 97
+            },
+            "family_emergency_voiceclone": {
+              "recall": 1.0,
+              "n": 64
+            },
+            "investment_trading": {
+              "recall": 0.984,
+              "n": 189
+            },
+            "job_task": {
+              "recall": 0.893,
+              "n": 112
+            },
+            "none": {
+              "recall": 0.268,
+              "n": 56
+            },
+            "romance": {
+              "recall": 0.92,
+              "n": 50
+            }
+          },
+          "fp_rate_by_hard_negative": {
+            "family_call_while_paying": {
+              "fp_rate": 0.226,
+              "n": 314
+            },
+            "fd_broken_for_genuine_need": {
+              "fp_rate": 0.68,
+              "n": 128
+            },
+            "first_time_investment_platform": {
+              "fp_rate": 0.532,
+              "n": 222
+            },
+            "large_new_payee_genuine": {
+              "fp_rate": 0.738,
+              "n": 347
+            },
+            "night_urgent_genuine": {
+              "fp_rate": 0.467,
+              "n": 122
+            },
+            "senior_paying_family": {
+              "fp_rate": 0.571,
+              "n": 203
+            }
+          }
+        },
+        "hold": {
+          "precision": 0.8742,
+          "recall": 0.5325,
+          "f1": 0.6618,
+          "fp_rate": 0.0113,
+          "fp_rate_hard_negatives": 0.0412,
+          "fp_rate_normal": 0.0003,
+          "recall_by_scam_type": {
+            "bank_kyc_impersonation": {
+              "recall": 0.76,
+              "n": 146
+            },
+            "courier_customs": {
+              "recall": 0.714,
+              "n": 56
+            },
+            "digital_arrest": {
+              "recall": 0.887,
+              "n": 97
+            },
+            "family_emergency_voiceclone": {
+              "recall": 0.688,
+              "n": 64
+            },
+            "investment_trading": {
+              "recall": 0.344,
+              "n": 189
+            },
+            "job_task": {
+              "recall": 0.384,
+              "n": 112
+            },
+            "none": {
+              "recall": 0.071,
+              "n": 56
+            },
+            "romance": {
+              "recall": 0.34,
+              "n": 50
+            }
+          },
+          "fp_rate_by_hard_negative": {
+            "family_call_while_paying": {
+              "fp_rate": 0.0,
+              "n": 314
+            },
+            "fd_broken_for_genuine_need": {
+              "fp_rate": 0.039,
+              "n": 128
+            },
+            "first_time_investment_platform": {
+              "fp_rate": 0.032,
+              "n": 222
+            },
+            "large_new_payee_genuine": {
+              "fp_rate": 0.121,
+              "n": 347
+            },
+            "night_urgent_genuine": {
+              "fp_rate": 0.0,
+              "n": 122
+            },
+            "senior_paying_family": {
+              "fp_rate": 0.005,
+              "n": 203
+            }
+          }
+        },
+        "band_share": {
+          "low": 0.7483,
+          "medium": 0.1735,
+          "high": 0.0782
+        }
+      },
+      "rules_only": {
+        "warn_or_hold": {
+          "precision": 0.6359,
+          "recall": 0.5195,
+          "f1": 0.5718,
+          "fp_rate": 0.0438,
+          "fp_rate_hard_negatives": 0.119,
+          "fp_rate_normal": 0.017,
+          "recall_by_scam_type": {
+            "bank_kyc_impersonation": {
+              "recall": 0.829,
+              "n": 146
+            },
+            "courier_customs": {
+              "recall": 0.786,
+              "n": 56
+            },
+            "digital_arrest": {
+              "recall": 0.928,
+              "n": 97
+            },
+            "family_emergency_voiceclone": {
+              "recall": 0.625,
+              "n": 64
+            },
+            "investment_trading": {
+              "recall": 0.344,
+              "n": 189
+            },
+            "job_task": {
+              "recall": 0.214,
+              "n": 112
+            },
+            "none": {
+              "recall": 0.089,
+              "n": 56
+            },
+            "romance": {
+              "recall": 0.22,
+              "n": 50
+            }
+          },
+          "fp_rate_by_hard_negative": {
+            "family_call_while_paying": {
+              "fp_rate": 0.054,
+              "n": 314
+            },
+            "fd_broken_for_genuine_need": {
+              "fp_rate": 0.383,
+              "n": 128
+            },
+            "first_time_investment_platform": {
+              "fp_rate": 0.081,
+              "n": 222
+            },
+            "large_new_payee_genuine": {
+              "fp_rate": 0.159,
+              "n": 347
+            },
+            "night_urgent_genuine": {
+              "fp_rate": 0.041,
+              "n": 122
+            },
+            "senior_paying_family": {
+              "fp_rate": 0.074,
+              "n": 203
+            }
+          }
+        },
+        "hold": {
+          "precision": 0.6422,
+          "recall": 0.261,
+          "f1": 0.3712,
+          "fp_rate": 0.0214,
+          "fp_rate_hard_negatives": 0.0352,
+          "fp_rate_normal": 0.0165,
+          "recall_by_scam_type": {
+            "bank_kyc_impersonation": {
+              "recall": 0.623,
+              "n": 146
+            },
+            "courier_customs": {
+              "recall": 0.375,
+              "n": 56
+            },
+            "digital_arrest": {
+              "recall": 0.691,
+              "n": 97
+            },
+            "family_emergency_voiceclone": {
+              "recall": 0.0,
+              "n": 64
+            },
+            "investment_trading": {
+              "recall": 0.101,
+              "n": 189
+            },
+            "job_task": {
+              "recall": 0.018,
+              "n": 112
+            },
+            "none": {
+              "recall": 0.0,
+              "n": 56
+            },
+            "romance": {
+              "recall": 0.02,
+              "n": 50
+            }
+          },
+          "fp_rate_by_hard_negative": {
+            "family_call_while_paying": {
+              "fp_rate": 0.029,
+              "n": 314
+            },
+            "fd_broken_for_genuine_need": {
+              "fp_rate": 0.031,
+              "n": 128
+            },
+            "first_time_investment_platform": {
+              "fp_rate": 0.023,
+              "n": 222
+            },
+            "large_new_payee_genuine": {
+              "fp_rate": 0.058,
+              "n": 347
+            },
+            "night_urgent_genuine": {
+              "fp_rate": 0.016,
+              "n": 122
+            },
+            "senior_paying_family": {
+              "fp_rate": 0.034,
+              "n": 203
+            }
+          }
+        },
+        "band_share": {
+          "low": 0.8952,
+          "medium": 0.0527,
+          "high": 0.0522
+        }
+      },
+      "combined": {
+        "warn_or_hold": {
+          "precision": 0.4384,
+          "recall": 0.9195,
+          "f1": 0.5937,
+          "fp_rate": 0.1734,
+          "fp_rate_hard_negatives": 0.5591,
+          "fp_rate_normal": 0.0394,
+          "recall_by_scam_type": {
+            "bank_kyc_impersonation": {
+              "recall": 0.979,
+              "n": 146
+            },
+            "courier_customs": {
+              "recall": 1.0,
+              "n": 56
+            },
+            "digital_arrest": {
+              "recall": 1.0,
+              "n": 97
+            },
+            "family_emergency_voiceclone": {
+              "recall": 1.0,
+              "n": 64
+            },
+            "investment_trading": {
+              "recall": 0.984,
+              "n": 189
+            },
+            "job_task": {
+              "recall": 0.893,
+              "n": 112
+            },
+            "none": {
+              "recall": 0.286,
+              "n": 56
+            },
+            "romance": {
+              "recall": 0.92,
+              "n": 50
+            }
+          },
+          "fp_rate_by_hard_negative": {
+            "family_call_while_paying": {
+              "fp_rate": 0.255,
+              "n": 314
+            },
+            "fd_broken_for_genuine_need": {
+              "fp_rate": 0.82,
+              "n": 128
+            },
+            "first_time_investment_platform": {
+              "fp_rate": 0.545,
+              "n": 222
+            },
+            "large_new_payee_genuine": {
+              "fp_rate": 0.764,
+              "n": 347
+            },
+            "night_urgent_genuine": {
+              "fp_rate": 0.467,
+              "n": 122
+            },
+            "senior_paying_family": {
+              "fp_rate": 0.586,
+              "n": 203
+            }
+          }
+        },
+        "hold": {
+          "precision": 0.7305,
+          "recall": 0.5844,
+          "f1": 0.6494,
+          "fp_rate": 0.0317,
+          "fp_rate_hard_negatives": 0.0734,
+          "fp_rate_normal": 0.0167,
+          "recall_by_scam_type": {
+            "bank_kyc_impersonation": {
+              "recall": 0.897,
+              "n": 146
+            },
+            "courier_customs": {
+              "recall": 0.786,
+              "n": 56
+            },
+            "digital_arrest": {
+              "recall": 0.907,
+              "n": 97
+            },
+            "family_emergency_voiceclone": {
+              "recall": 0.688,
+              "n": 64
+            },
+            "investment_trading": {
+              "recall": 0.418,
+              "n": 189
+            },
+            "job_task": {
+              "recall": 0.384,
+              "n": 112
+            },
+            "none": {
+              "recall": 0.071,
+              "n": 56
+            },
+            "romance": {
+              "recall": 0.34,
+              "n": 50
+            }
+          },
+          "fp_rate_by_hard_negative": {
+            "family_call_while_paying": {
+              "fp_rate": 0.029,
+              "n": 314
+            },
+            "fd_broken_for_genuine_need": {
+              "fp_rate": 0.062,
+              "n": 128
+            },
+            "first_time_investment_platform": {
+              "fp_rate": 0.054,
+              "n": 222
+            },
+            "large_new_payee_genuine": {
+              "fp_rate": 0.17,
+              "n": 347
+            },
+            "night_urgent_genuine": {
+              "fp_rate": 0.016,
+              "n": 122
+            },
+            "senior_paying_family": {
+              "fp_rate": 0.039,
+              "n": 203
+            }
+          }
+        },
+        "band_share": {
+          "low": 0.7308,
+          "medium": 0.1665,
+          "high": 0.1027
+        }
+      }
+    },
+    "post_pause": {
+      "ml_only": {
+        "warn_or_hold": {
+          "precision": 0.6462,
+          "recall": 0.9273,
+          "f1": 0.7616,
+          "fp_rate": 0.0748,
+          "fp_rate_hard_negatives": 0.25,
+          "fp_rate_normal": 0.0129,
+          "recall_by_scam_type": {
+            "bank_kyc_impersonation": {
+              "recall": 1.0,
+              "n": 146
+            },
+            "courier_customs": {
+              "recall": 1.0,
+              "n": 56
+            },
+            "digital_arrest": {
+              "recall": 1.0,
+              "n": 97
+            },
+            "family_emergency_voiceclone": {
+              "recall": 0.969,
+              "n": 64
+            },
+            "investment_trading": {
+              "recall": 0.984,
+              "n": 189
+            },
+            "job_task": {
+              "recall": 0.991,
+              "n": 112
+            },
+            "none": {
+              "recall": 0.179,
+              "n": 56
+            },
+            "romance": {
+              "recall": 0.92,
+              "n": 50
+            }
+          },
+          "fp_rate_by_hard_negative": {
+            "family_call_while_paying": {
+              "fp_rate": 0.048,
+              "n": 314
+            },
+            "fd_broken_for_genuine_need": {
+              "fp_rate": 0.203,
+              "n": 128
+            },
+            "first_time_investment_platform": {
+              "fp_rate": 0.572,
+              "n": 222
+            },
+            "large_new_payee_genuine": {
+              "fp_rate": 0.305,
+              "n": 347
+            },
+            "night_urgent_genuine": {
+              "fp_rate": 0.148,
+              "n": 122
+            },
+            "senior_paying_family": {
+              "fp_rate": 0.207,
+              "n": 203
+            }
+          }
+        },
+        "hold": {
+          "precision": 0.9018,
+          "recall": 0.7987,
+          "f1": 0.8471,
+          "fp_rate": 0.0128,
+          "fp_rate_hard_negatives": 0.0449,
+          "fp_rate_normal": 0.0003,
+          "recall_by_scam_type": {
+            "bank_kyc_impersonation": {
+              "recall": 0.979,
+              "n": 146
+            },
+            "courier_customs": {
+              "recall": 0.982,
+              "n": 56
+            },
+            "digital_arrest": {
+              "recall": 0.99,
+              "n": 97
+            },
+            "family_emergency_voiceclone": {
+              "recall": 0.75,
+              "n": 64
+            },
+            "investment_trading": {
+              "recall": 0.815,
+              "n": 189
+            },
+            "job_task": {
+              "recall": 0.83,
+              "n": 112
+            },
+            "none": {
+              "recall": 0.071,
+              "n": 56
+            },
+            "romance": {
+              "recall": 0.44,
+              "n": 50
+            }
+          },
+          "fp_rate_by_hard_negative": {
+            "family_call_while_paying": {
+              "fp_rate": 0.006,
+              "n": 314
+            },
+            "fd_broken_for_genuine_need": {
+              "fp_rate": 0.055,
+              "n": 128
+            },
+            "first_time_investment_platform": {
+              "fp_rate": 0.108,
+              "n": 222
+            },
+            "large_new_payee_genuine": {
+              "fp_rate": 0.072,
+              "n": 347
+            },
+            "night_urgent_genuine": {
+              "fp_rate": 0.0,
+              "n": 122
+            },
+            "senior_paying_family": {
+              "fp_rate": 0.01,
+              "n": 203
+            }
+          }
+        },
+        "band_share": {
+          "low": 0.8158,
+          "medium": 0.0705,
+          "high": 0.1137
+        }
+      },
+      "rules_only": {
+        "warn_or_hold": {
+          "precision": 0.7049,
+          "recall": 0.4312,
+          "f1": 0.5351,
+          "fp_rate": 0.0266,
+          "fp_rate_hard_negatives": 0.0531,
+          "fp_rate_normal": 0.017,
+          "recall_by_scam_type": {
+            "bank_kyc_impersonation": {
+              "recall": 0.836,
+              "n": 146
+            },
+            "courier_customs": {
+              "recall": 0.821,
+              "n": 56
+            },
+            "digital_arrest": {
+              "recall": 0.918,
+              "n": 97
+            },
+            "family_emergency_voiceclone": {
+              "recall": 0.344,
+              "n": 64
+            },
+            "investment_trading": {
+              "recall": 0.164,
+              "n": 189
+            },
+            "job_task": {
+              "recall": 0.098,
+              "n": 112
+            },
+            "none": {
+              "recall": 0.054,
+              "n": 56
+            },
+            "romance": {
+              "recall": 0.16,
+              "n": 50
+            }
+          },
+          "fp_rate_by_hard_negative": {
+            "family_call_while_paying": {
+              "fp_rate": 0.054,
+              "n": 314
+            },
+            "fd_broken_for_genuine_need": {
+              "fp_rate": 0.102,
+              "n": 128
+            },
+            "first_time_investment_platform": {
+              "fp_rate": 0.027,
+              "n": 222
+            },
+            "large_new_payee_genuine": {
+              "fp_rate": 0.075,
+              "n": 347
+            },
+            "night_urgent_genuine": {
+              "fp_rate": 0.016,
+              "n": 122
+            },
+            "senior_paying_family": {
+              "fp_rate": 0.034,
+              "n": 203
+            }
+          }
+        },
+        "hold": {
+          "precision": 0.663,
+          "recall": 0.3117,
+          "f1": 0.424,
+          "fp_rate": 0.0233,
+          "fp_rate_hard_negatives": 0.0404,
+          "fp_rate_normal": 0.017,
+          "recall_by_scam_type": {
+            "bank_kyc_impersonation": {
+              "recall": 0.733,
+              "n": 146
+            },
+            "courier_customs": {
+              "recall": 0.446,
+              "n": 56
+            },
+            "digital_arrest": {
+              "recall": 0.711,
+              "n": 97
+            },
+            "family_emergency_voiceclone": {
+              "recall": 0.156,
+              "n": 64
+            },
+            "investment_trading": {
+              "recall": 0.106,
+              "n": 189
+            },
+            "job_task": {
+              "recall": 0.054,
+              "n": 112
+            },
+            "none": {
+              "recall": 0.018,
+              "n": 56
+            },
+            "romance": {
+              "recall": 0.04,
+              "n": 50
+            }
+          },
+          "fp_rate_by_hard_negative": {
+            "family_call_while_paying": {
+              "fp_rate": 0.051,
+              "n": 314
+            },
+            "fd_broken_for_genuine_need": {
+              "fp_rate": 0.031,
+              "n": 128
+            },
+            "first_time_investment_platform": {
+              "fp_rate": 0.023,
+              "n": 222
+            },
+            "large_new_payee_genuine": {
+              "fp_rate": 0.058,
+              "n": 347
+            },
+            "night_urgent_genuine": {
+              "fp_rate": 0.016,
+              "n": 122
+            },
+            "senior_paying_family": {
+              "fp_rate": 0.034,
+              "n": 203
+            }
+          }
+        },
+        "band_share": {
+          "low": 0.9215,
+          "medium": 0.0182,
+          "high": 0.0603
+        }
+      },
+      "combined": {
+        "warn_or_hold": {
+          "precision": 0.5885,
+          "recall": 0.9286,
+          "f1": 0.7204,
+          "fp_rate": 0.0956,
+          "fp_rate_hard_negatives": 0.2844,
+          "fp_rate_normal": 0.0291,
+          "recall_by_scam_type": {
+            "bank_kyc_impersonation": {
+              "recall": 1.0,
+              "n": 146
+            },
+            "courier_customs": {
+              "recall": 1.0,
+              "n": 56
+            },
+            "digital_arrest": {
+              "recall": 1.0,
+              "n": 97
+            },
+            "family_emergency_voiceclone": {
+              "recall": 0.969,
+              "n": 64
+            },
+            "investment_trading": {
+              "recall": 0.984,
+              "n": 189
+            },
+            "job_task": {
+              "recall": 0.991,
+              "n": 112
+            },
+            "none": {
+              "recall": 0.196,
+              "n": 56
+            },
+            "romance": {
+              "recall": 0.92,
+              "n": 50
+            }
+          },
+          "fp_rate_by_hard_negative": {
+            "family_call_while_paying": {
+              "fp_rate": 0.092,
+              "n": 314
+            },
+            "fd_broken_for_genuine_need": {
+              "fp_rate": 0.281,
+              "n": 128
+            },
+            "first_time_investment_platform": {
+              "fp_rate": 0.581,
+              "n": 222
+            },
+            "large_new_payee_genuine": {
+              "fp_rate": 0.346,
+              "n": 347
+            },
+            "night_urgent_genuine": {
+              "fp_rate": 0.156,
+              "n": 122
+            },
+            "senior_paying_family": {
+              "fp_rate": 0.232,
+              "n": 203
+            }
+          }
+        },
+        "hold": {
+          "precision": 0.7711,
+          "recall": 0.8052,
+          "f1": 0.7878,
+          "fp_rate": 0.0352,
+          "fp_rate_hard_negatives": 0.0831,
+          "fp_rate_normal": 0.0172,
+          "recall_by_scam_type": {
+            "bank_kyc_impersonation": {
+              "recall": 0.979,
+              "n": 146
+            },
+            "courier_customs": {
+              "recall": 1.0,
+              "n": 56
+            },
+            "digital_arrest": {
+              "recall": 0.99,
+              "n": 97
+            },
+            "family_emergency_voiceclone": {
+              "recall": 0.75,
+              "n": 64
+            },
+            "investment_trading": {
+              "recall": 0.836,
+              "n": 189
+            },
+            "job_task": {
+              "recall": 0.83,
+              "n": 112
+            },
+            "none": {
+              "recall": 0.071,
+              "n": 56
+            },
+            "romance": {
+              "recall": 0.44,
+              "n": 50
+            }
+          },
+          "fp_rate_by_hard_negative": {
+            "family_call_while_paying": {
+              "fp_rate": 0.057,
+              "n": 314
+            },
+            "fd_broken_for_genuine_need": {
+              "fp_rate": 0.086,
+              "n": 128
+            },
+            "first_time_investment_platform": {
+              "fp_rate": 0.126,
+              "n": 222
+            },
+            "large_new_payee_genuine": {
+              "fp_rate": 0.124,
+              "n": 347
+            },
+            "night_urgent_genuine": {
+              "fp_rate": 0.016,
+              "n": 122
+            },
+            "senior_paying_family": {
+              "fp_rate": 0.044,
+              "n": 203
+            }
+          }
+        },
+        "band_share": {
+          "low": 0.7975,
+          "medium": 0.0685,
+          "high": 0.134
+        }
+      }
+    }
+  },
+  "metrics_scope": "Coercion module only, per stage: ML alone, rules alone, and rules+ML with severe override. Not included: the ML pressure gate, the fusion engine (R6b, trust, mule) and the two-stage flow. Those are measured end to end by scripts/evaluate_system.py (Phase 6)."
+}

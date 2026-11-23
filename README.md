@@ -51,6 +51,24 @@ Payees with fewer than `MULE_MIN_HISTORY_TXNS = 5` transactions get the status
 coercion signals alone. Evidence: `scripts/probe_mule_history.py` →
 `reports/mule_history_probe.json`.
 
+## Coercion model: known caveats
+
+- **Synthetic data, feasibility only.** Metrics on `safepay_coercion_synthetic.csv` show the design
+  is feasible, not real-world accuracy.
+- **`job_task_fee` is a synthetic-data artefact.** The purposes `job_task_fee`, `govt_fine_verification`
+  and `refund_cashback` appear **only** on coerced rows. Demo Scenario 4 (job/task scam) scores
+  **0.999** post-pause with purpose `job_task_fee`, and that score is optimistic. With purpose
+  `other` it still scores 0.963 (HOLD), because `other` is also over-represented among coerced rows
+  (36.2% vs a 12.8% base rate). Without the model, its escalation pattern alone still gives WARN.
+- **Rules revised after one look at the test set.** Two rule changes were made after the test set
+  had been seen once, and were justified on validation data only:
+  1. "Someone is guiding me" is severe only during a call with an unknown number.
+  2. The "I know this payee" contradiction is soft.
+
+  Model cut-offs were not changed. Because the test set had been seen, **the Phase 6 evaluation
+  numbers may be slightly optimistic.** Details are in `models/coercion_model_card.json`
+  → `rule_revisions`.
+
 ## Privacy
 
 Only fictional demo users. No UPI PINs, OTPs, passwords, call audio, screen content or

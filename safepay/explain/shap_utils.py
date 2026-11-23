@@ -34,12 +34,18 @@ class TreeExplainer:
         if self.use_shap:
             import shap
             self._ex = shap.TreeExplainer(model)
-            ev = np.atleast_1d(self._ex.expected_value)
-            self.base_value = float(ev[1] if ev.size > 1 else ev[0])
         else:
             self._ex = None
-            self.base_value = float(np.mean([self._tree_p1(t.tree_)[0] for t in self._trees()]))
+            self._fallback_base = float(np.mean([self._tree_p1(t.tree_)[0] for t in self._trees()]))
         self.method = METHOD_SHAP if self.use_shap else METHOD_FALLBACK
+
+    @property
+    def base_value(self) -> float:
+        """Read on demand: for XGBoost, shap fills expected_value only after the first shap_values call."""
+        if not self.use_shap:
+            return self._fallback_base
+        ev = np.atleast_1d(self._ex.expected_value)
+        return float(ev[1] if ev.size > 1 else ev[0])
 
     # ---------------------------------------------------------------- public
     def contributions(self, X: pd.DataFrame) -> np.ndarray:
