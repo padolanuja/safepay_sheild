@@ -235,6 +235,8 @@ def assess(conn, mule_predictor, coercion_model, *, user_id, payee_vpa, amount, 
         "trust": trust,
         "explanation": explanation,
         "recommended_action": ACTIONS[fusion["decision"]],
+        "response": {"cooling_off_minutes": config.COOLING_OFF_MINUTES, "helpline": config.HELPLINE_NUMBER,
+                     "helpline_url": config.HELPLINE_URL},
         "language": user["language"],
         "inputs": src,
         "payee": {"vpa": vpa, "masked": db.mask_vpa(vpa), "display_name": payee["display_name"] if payee else None,
@@ -263,11 +265,13 @@ def explain(fusion, mule, coercion, split, devs, trust, cap) -> dict:
     if ml["status"] == "ok" and coercion["ml_used"]:
         for f, imp in _scaled(ml["risk_raising_factors"], ml["ml_probability"]):
             factors.append({"source": "model_prediction:coercion", "id": f["feature"], "text": f["text"],
-                            "impact": imp, "shap_value": f["contribution"], "text_key": f["text_key"]})
+                            "value": f["value"], "impact": imp, "shap_value": f["contribution"],
+                            "text_key": f["text_key"]})
     if mule.get("status") == "ok" and mule.get("band") != "low":
         for f, imp in _scaled(mule["risk_raising_factors"], mule["mule_probability"]):
             factors.append({"source": "model_prediction:mule", "id": f["feature"], "text": f["text"],
-                            "impact": imp, "shap_value": f["contribution"], "text_key": f["text_key"]})
+                            "value": f["value"], "impact": imp, "shap_value": f["contribution"],
+                            "text_key": f["text_key"]})
     for p in split["patterns"]:
         factors.append({"source": "rule:splitting", "id": p["id"], "text": p["text"], "impact": None,
                         "text_key": f"split.{p['id']}"})

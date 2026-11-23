@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block title %}Pay{% endblock %}
+{% block content %}
+<div class="pay-layout">
+
+  <!-- ============ Situation simulator ============ -->
+  <aside class="panel sim" aria-labelledby="simTitle">
+    <div class="panel-head">
+      <h2 id="simTitle" data-i18n="sim.title">Situation simulator</h2>
+      <p class="muted small" data-i18n="sim.sub">Simulated phone signals (demo only)</p>
+    </div>
+
+    <label class="field">
+      <span data-i18n="sim.preset">Preset scenario</span>
+      <select id="preset"></select>
+    </label>
+    <div id="presetInfo" class="preset-info" hidden></div>
+
+    <div class="sim-group">
+      <span class="group-label" data-i18n="sim.call">Phone call</span>
+      <div class="segmented" id="callType" role="radiogroup">
+        <button type="button" data-val="none" data-i18n="sim.call_none">No call</button>
+        <button type="button" data-val="voice" data-i18n="sim.call_voice">Voice call</button>
+        <button type="button" data-val="video" data-i18n="sim.call_video">Video call</button>
+      </div>
+      <div id="callDetails" class="call-details">
+        <label class="range"><span><span data-i18n="sim.call_minutes">Call length (minutes)</span> <output id="callMinOut">0</output></span>
+          <input type="range" id="call_duration_min" min="0" max="180" step="1" value="0"></label>
+        <label class="switch"><input type="checkbox" id="caller_in_contacts"><span data-i18n="sim.caller_known">Caller is a saved contact</span></label>
+        <label class="switch"><input type="checkbox" id="caller_is_international"><span data-i18n="sim.international">International number</span></label>
+      </div>
+    </div>
+
+    <div class="sim-group">
+      <label class="switch danger"><input type="checkbox" id="screen_share_active"><span data-i18n="sim.screen_share">Screen sharing on</span></label>
+      <label class="switch danger"><input type="checkbox" id="remote_access_app_installed_7d"><span data-i18n="sim.remote_app">Remote-access app installed in last 7 days</span></label>
+      <label class="switch"><input type="checkbox" id="vpa_pasted"><span data-i18n="sim.vpa_pasted">UPI ID pasted</span></label>
+      <label class="switch"><input type="checkbox" id="payee_in_contacts"><span data-i18n="sim.payee_in_contacts">Payee saved in contacts</span></label>
+      <label class="switch"><input type="checkbox" id="fd_or_loan_liquidated_7d"><span data-i18n="sim.fd_broken">FD broken / loan taken this week</span></label>
+      <label class="switch"><input type="checkbox" id="segmented_typing"><span data-i18n="sim.segmented">Stop-start typing</span></label>
+    </div>
+
+    <div class="sim-group">
+      <label class="range"><span><span data-i18n="sim.hesitation">Hesitation level</span> <output id="hesOut">0</output></span>
+        <input type="range" id="hesitation_events" min="0" max="10" value="0"></label>
+      <label class="range"><span><span data-i18n="sim.app_switches">App switches</span> <output id="appOut">0</output></span>
+        <input type="range" id="app_switches" min="0" max="10" value="0"></label>
+      <label class="range"><span><span data-i18n="sim.session">Time on payment screen (seconds)</span> <output id="sessOut">45</output></span>
+        <input type="range" id="session_duration_sec" min="5" max="600" step="5" value="45"></label>
+      <label class="range"><span><span data-i18n="sim.hour">Time of day</span> <output id="hourOut">14:00</output> <em id="nightTag" class="tag tag-night" data-i18n="sim.night" hidden>Night-time</em></span>
+        <input type="range" id="hour_of_day" min="0" max="23" value="14"></label>
+      <label class="range" id="newPayeesWrap"><span><span data-i18n="sim.new_payees_24h">Payments to new people in last 24 h</span> <output id="npOut">0</output></span>
+        <input type="range" id="new_payees_24h" min="0" max="8" value="0"></label>
+    </div>
+    <button type="button" class="btn btn-ghost btn-block" id="resetSim" data-i18n="btn.reset">Reset</button>
+  </aside>
+
+  <!-- ============ Phone ============ -->
+  <section class="phone-col" aria-label="Simulated UPI app">
+    <div class="phone">
+      <div class="phone-notch"></div>
+      <div class="phone-status"><span id="clock">14:00</span><span class="status-icons">▮▮▮ ◔</span></div>
+      <div class="phone-appbar">
+        <span class="app-logo">₹</span><span data-i18n="app.demo_bank">DemoPay UPI</span>
+        <span class="shield-chip" title="SafePay Shield"><svg viewBox="0 0 32 32"><path d="M16 2 4 7v8c0 7.2 5.1 13.4 12 15 6.9-1.6 12-7.8 12-15V7z"/></svg> Shield</span>
+      </div>
+      <div class="phone-screen" id="screen"></div>
+      <div class="phone-foot" data-i18n="app.simulated">Simulated — no real money moved</div>
+    </div>
+  </section>
+
+  <!-- ============ Why? panel ============ -->
+  <section class="panel why" id="why" aria-labelledby="whyTitle">
+    <div class="panel-head">
+      <h2 id="whyTitle" data-i18n="why.title">Why?</h2>
+      <span class="sim-label" data-i18n="app.simulated">Simulated — no real money moved</span>
+    </div>
+    <div id="whyBody"><p class="muted" data-i18n="why.empty">Make a payment to see why SafePay Shield decided what it did.</p></div>
+  </section>
+</div>
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='js/pay.js') }}"></script>{% endblock %}

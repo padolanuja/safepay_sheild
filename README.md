@@ -88,6 +88,18 @@ threshold on the **validation** split, never the test set, against a stated hard
 budget. Disclose it as a further change made after the test set was seen. Thresholds were
 deliberately left unchanged here.
 
+## Frontend and languages
+
+Run `.\.venv\Scripts\flask --app app run`, then open <http://localhost:5000>. There are four screens:
+- **Pay**: the simulated UPI app, the Situation Simulator with the 13 presets, and the "Why?" panel.
+- **Dashboard**: history, decisions over time, the most common warning signs and the feedback queue.
+- **Evaluation**: reads `reports/`.
+- **Settings**: trusted contacts with consent, trusted payees, planned payments and language.
+
+Every warning, question, reason and button label is in `safepay/i18n/{en,hi,mr}.json`. The user
+can switch language at any time. **The Hindi and Marathi text was machine-written and should be
+reviewed by a native speaker before any real use.**
+
 ## Privacy
 
 Only fictional demo users. No UPI PINs, OTPs, passwords, call audio, screen content or

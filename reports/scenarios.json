@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-23T21:51:33+00:00",
+  "generated_at": "2026-11-23T22:11:48+00:00",
   "data": "fictional demo users; payees partly derived from RBIH accounts (pseudonymised)",
   "passed": 13,
   "total": 13,
@@ -26,7 +26,7 @@
         "splitting": [],
         "trust_applied": false,
         "reason": "Serious warning signs: video call with an unknown number for 120 min. For your safety this payment is on a simulated hold.",
-        "latency_ms": 117.3
+        "latency_ms": 165.1
       },
       "post_pause": {
         "decision": "HOLD",
@@ -40,7 +40,7 @@
         "splitting": [],
         "trust_applied": false,
         "reason": "Serious warning signs: video call with an unknown number for 120 min. For your safety this payment is on a simulated hold.",
-        "latency_ms": 18.0
+        "latency_ms": 25.4
       }
     },
     {
@@ -65,7 +65,7 @@
         "splitting": [],
         "trust_applied": false,
         "reason": "Serious warning signs: screen sharing is on during the payment; a remote-access app was installed in the last 7 days. For your safety this payment is on a simulated hold.",
-        "latency_ms": 119.6
+        "latency_ms": 148.5
       },
       "post_pause": {
         "decision": "HOLD",
@@ -79,7 +79,7 @@
         "splitting": [],
         "trust_applied": false,
         "reason": "Serious warning signs: screen sharing is on during the payment; a remote-access app was installed in the last 7 days. For your safety this payment is on a simulated hold.",
-        "latency_ms": 17.0
+        "latency_ms": 22.9
       }
     },
     {
@@ -107,7 +107,7 @@
         ],
         "trust_applied": false,
         "reason": "This account shows suspicious money movement, and there are signs this payment may not be your free choice.",
-        "latency_ms": 189.6
+        "latency_ms": 259.1
       },
       "post_pause": {
         "decision": "HOLD",
@@ -123,7 +123,7 @@
         ],
         "trust_applied": false,
         "reason": "Several strong signs that someone may be pressuring you to pay.",
-        "latency_ms": 132.6
+        "latency_ms": 152.0
       }
     },
     {
@@ -151,7 +151,7 @@
         ],
         "trust_applied": false,
         "reason": "Some signs that this payment may not be your own free choice. Please check before you pay.",
-        "latency_ms": 82.1
+        "latency_ms": 104.1
       },
       "post_pause": {
         "decision": "HOLD",
@@ -167,7 +167,7 @@
         ],
         "trust_applied": false,
         "reason": "Several strong signs that someone may be pressuring you to pay.",
-        "latency_ms": 17.1
+        "latency_ms": 24.1
       }
     },
     {
@@ -192,7 +192,7 @@
         "splitting": [],
         "trust_applied": false,
         "reason": "Some signs that this payment may not be your own free choice. Please check before you pay.",
-        "latency_ms": 185.8
+        "latency_ms": 273.0
       },
       "post_pause": {
         "decision": "WARN",
@@ -206,7 +206,7 @@
         "splitting": [],
         "trust_applied": false,
         "reason": "Some signs that this payment may not be your own free choice. Please check before you pay.",
-        "latency_ms": 124.9
+        "latency_ms": 166.8
       }
     },
     {
@@ -235,7 +235,7 @@
         ],
         "trust_applied": false,
         "reason": "Some signs that this payment may not be your own free choice. Please check before you pay.",
-        "latency_ms": 83.7
+        "latency_ms": 107.9
       },
       "post_pause": {
         "decision": "HOLD",
@@ -252,7 +252,7 @@
         ],
         "trust_applied": false,
         "reason": "Several strong signs that someone may be pressuring you to pay.",
-        "latency_ms": 18.2
+        "latency_ms": 25.0
       }
     },
     {
@@ -277,7 +277,7 @@
         "splitting": [],
         "trust_applied": false,
         "reason": "This payment is much larger than usual and goes to someone you haven't paid before. Please check the details before paying. This alone is not a sign of a scam.",
-        "latency_ms": 191.5
+        "latency_ms": 277.7
       },
       "post_pause": {
         "decision": "WARN",
@@ -291,7 +291,7 @@
         "splitting": [],
         "trust_applied": false,
         "reason": "This payment is much larger than usual and goes to someone you haven't paid before. Please check the details before paying. This alone is not a sign of a scam.",
-        "latency_ms": 134.0
+        "latency_ms": 166.1
       }
     },
     {
@@ -316,7 +316,7 @@
         "splitting": [],
         "trust_applied": false,
         "reason": "No warning signs found.",
-        "latency_ms": 153.0
+        "latency_ms": 213.4
       },
       "post_pause": null
     },
@@ -342,7 +342,7 @@
         "splitting": [],
         "trust_applied": false,
         "reason": "No warning signs found.",
-        "latency_ms": 157.1
+        "latency_ms": 245.5
       },
       "post_pause": null
     },
@@ -368,7 +368,7 @@
         "splitting": [],
         "trust_applied": false,
         "reason": "This account shows suspicious money movement.",
-        "latency_ms": 151.7
+        "latency_ms": 234.9
       },
       "post_pause": {
         "decision": "WARN",
@@ -382,7 +382,7 @@
         "splitting": [],
         "trust_applied": false,
         "reason": "This account shows suspicious money movement.",
-        "latency_ms": 135.3
+        "latency_ms": 177.4
       }
     },
     {
@@ -407,7 +407,7 @@
         "splitting": [],
         "trust_applied": false,
         "reason": "No warning signs found.",
-        "latency_ms": 160.9
+        "latency_ms": 197.6
       },
       "post_pause": null
     },
@@ -433,7 +433,7 @@
         "splitting": [],
         "trust_applied": false,
         "reason": "No warning signs found.",
-        "latency_ms": 78.7
+        "latency_ms": 118.7
       },
       "post_pause": null
     },
@@ -459,7 +459,7 @@
         "splitting": [],
         "trust_applied": false,
         "reason": "Serious warning signs: screen sharing is on during the payment. For your safety this payment is on a simulated hold.",
-        "latency_ms": 152.2
+        "latency_ms": 201.6
       },
       "post_pause": {
         "decision": "HOLD",
@@ -473,7 +473,7 @@
         "splitting": [],
         "trust_applied": false,
         "reason": "Serious warning signs: screen sharing is on during the payment. For your safety this payment is on a simulated hold.",
-        "latency_ms": 129.9
+        "latency_ms": 165.4
       }
     }
   ]

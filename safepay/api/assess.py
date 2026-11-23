@@ -15,7 +15,8 @@ from safepay.assess import assess as run_assess
 from safepay.assess import save_assessment
 
 bp = Blueprint("assess", __name__)
-ALLOWED = {"user_id", "payee_vpa", "amount", "situation", "stage", "answers", "payee_type"}
+ALLOWED = {"user_id", "payee_vpa", "amount", "situation", "stage", "answers", "payee_type", "pre_assessment_id"}
+ORDER = ["ALLOW", "WARN", "HOLD"]
 
 
 def _body() -> dict:
@@ -40,10 +41,25 @@ def _run(body):
 
 @bp.post("/assess")
 def assess():
-    result = _run(_body())
+    """For stage post_pause, pass pre_assessment_id: the response's final_decision is then the
+    HIGHER of the two passes (answers can raise a decision, never lower it)."""
+    body = _body()
     conn = get_db()
+    pre = None
+    if body.get("stage") == "post_pause":
+        pid = body.get("pre_assessment_id")
+        if isinstance(pid, bool) or not isinstance(pid, int):
+            abort(400, description="pre_assessment_id (integer) is required for the post_pause stage")
+        pre = conn.execute("SELECT decision, user_id, stage FROM risk_assessments WHERE id = ?", (pid,)).fetchone()
+        if pre is None or pre["user_id"] != body["user_id"] or pre["stage"] != "pre_pause":
+            abort(404, description=f"pre-pause assessment {pid} not found for this user")
+    result = _run(body)
     result["assessment_id"] = save_assessment(conn, result)
     conn.commit()
+    result["pre_decision"] = pre["decision"] if pre else None
+    result["final_decision"] = ORDER[max(ORDER.index(result["decision"]),
+                                         ORDER.index(pre["decision"]) if pre else 0)]
+    result["answers_raised_decision"] = bool(pre) and ORDER.index(result["decision"]) > ORDER.index(pre["decision"])
     return jsonify(result)
 
 

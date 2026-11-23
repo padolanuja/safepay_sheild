@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div><h1 data-i18n="dash.title">Dashboard</h1>
+    <p class="muted small">Demo activity on fictional payers. Every first check and every re-check after questions is counted.</p></div>
+  <div class="filters">
+    <label class="field-inline"><span class="sr-only">Payer filter</span><select id="fUser"></select></label>
+    <label class="field-inline"><span class="sr-only">Decision filter</span>
+      <select id="fDecision"><option value="" data-i18n="dash.filter_all">All</option>
+        <option value="ALLOW">ALLOW</option><option value="WARN">WARN</option><option value="HOLD">HOLD</option></select></label>
+  </div>
+</div>
+<div class="tiles" id="tiles"></div>
+<div class="grid-2">
+  <section class="panel"><h2 class="section" data-i18n="dash.over_time">Decisions over time</h2><div id="overTime"></div></section>
+  <section class="panel"><h2 class="section" data-i18n="dash.top_indicators">Most common warning signs</h2><div id="topInd"></div></section>
+</div>
+<section class="panel" style="margin-bottom:18px">
+  <h2 class="section" data-i18n="dash.history">Transaction history</h2>
+  <div class="table-wrap"><table id="histTable"></table></div>
+</section>
+<section class="panel">
+  <h2 class="section" data-i18n="dash.feedback">Feedback queue</h2>
+  <p class="caveat" data-i18n="dash.feedback_note">Stored for human review only. Models are never retrained from feedback.</p>
+  <div class="table-wrap"><table id="fbTable"></table></div>
+</section>
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>{% endblock %}

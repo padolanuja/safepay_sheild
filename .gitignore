@@ -9,3 +9,5 @@ data/*.db
 data/coercion/
 # Original drop-in copy; the tracked, byte-identical copy is models/safepay_mule_model.pkl
 /safepay_mule_model.pkl
+# local Claude Code preview config
+.claude/

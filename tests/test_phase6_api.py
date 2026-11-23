@@ -75,9 +75,12 @@ def test_assess_unknown_payee_with_type_is_insufficient_history(api):
 
 def test_assess_post_pause_with_answers(api):
     c, _ = api
-    j = _assess(c, stage="post_pause", answers={"ans_know_payee": "yes", "ans_someone_guiding": "no",
-                                               "ans_purpose": "bills_shopping", "checklist": []}).get_json()
+    pre = _assess(c).get_json()
+    j = _assess(c, stage="post_pause", pre_assessment_id=pre["assessment_id"],
+                answers={"ans_know_payee": "yes", "ans_someone_guiding": "no",
+                         "ans_purpose": "bills_shopping", "checklist": []}).get_json()
     assert j["stage"] == "post_pause" and j["inputs"]["ans_purpose"]["source"] == "user_answer"
+    assert j["pre_decision"] == pre["decision"] and j["final_decision"] == j["decision"]
 
 
 def test_assess_503_when_coercion_model_missing(api):
