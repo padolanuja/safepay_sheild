@@ -13,8 +13,11 @@ from werkzeug.exceptions import HTTPException
 
 import config
 from safepay.api import register_blueprints
+from safepay.assess import ModelUnavailable, NotFound
+from safepay.coercion.model import CoercionModel
 from safepay.mule.loader import MuleModelError, load_mule_model
 from safepay.mule.predictor import MulePredictor
+from safepay.validation import ValidationError
 
 
 def create_app(db_path=None) -> Flask:
@@ -30,9 +33,21 @@ def create_app(db_path=None) -> Flask:
         app.config["MULE_MODEL"] = None
         app.config["MULE_MODEL_ERROR"] = str(e)
     app.config["MULE_PREDICTOR"] = MulePredictor(app.config["MULE_MODEL"], app.config["MULE_MODEL_ERROR"])
-    app.config["COERCION_MODEL"] = None   # trained in Phase 5 (scripts/train_coercion_model.py)
+    app.config["COERCION_MODEL"] = CoercionModel()   # status "unavailable" if not trained/invalid
 
     register_blueprints(app)
+
+    @app.errorhandler(ValidationError)
+    def _bad_input(e):
+        return jsonify(error="Bad Request", message=str(e), status=400), 400
+
+    @app.errorhandler(NotFound)
+    def _not_found(e):
+        return jsonify(error="Not Found", message=str(e), status=404), 404
+
+    @app.errorhandler(ModelUnavailable)
+    def _unavailable(e):
+        return jsonify(error="Service Unavailable", message=str(e), status=503), 503
 
     @app.errorhandler(HTTPException)
     def _http_error(e: HTTPException):

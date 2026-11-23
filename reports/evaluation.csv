@@ -1,0 +1,6 @@
+approach,name,intervene_tp,intervene_fp,intervene_fn,intervene_precision,intervene_recall,intervene_f1,intervene_fp_rate,intervene_fp_rate_hard_negatives,hold_tp,hold_fp,hold_fn,hold_precision,hold_recall,hold_f1,hold_fp_rate,hold_fp_rate_hard_negatives,share_ALLOW,share_WARN,share_HOLD
+rule_new_payee_5x,Rule: new payee + 5x amount,582,641,387,0.4759,0.6006,0.531,0.1274,0.4844,0,0,969,0.0,0.0,0.0,0.0,0.0,0.7962,0.2038,0.0
+rule_new_unknown_call,Rule: new payee + unknown call,261,29,708,0.9,0.2693,0.4146,0.0058,0.0164,0,0,969,0.0,0.0,0.0,0.0,0.0,0.9517,0.0483,0.0
+mule_only,Mule model only,178,77,791,0.698,0.1837,0.2908,0.0153,0.0133,0,0,969,0.0,0.0,0.0,0.0,0.0,0.9575,0.0425,0.0
+coercion_only,Coercion only,740,956,229,0.4363,0.7637,0.5553,0.19,0.6484,619,200,350,0.7558,0.6388,0.6924,0.0398,0.1016,0.7173,0.1462,0.1365
+combined,SafePay Shield (combined),831,1016,138,0.4499,0.8576,0.5902,0.2019,0.6516,621,200,348,0.7564,0.6409,0.6939,0.0398,0.1016,0.6922,0.171,0.1368

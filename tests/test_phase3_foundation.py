@@ -112,7 +112,9 @@ def test_mask_vpa():
 def test_health(client):
     r = client.get("/api/health").get_json()
     assert r["models"]["mule"]["loaded"] is True
-    assert r["models"]["coercion"]["loaded"] is False
+    assert r["models"]["coercion"]["loaded"] is True          # trained in Phase 5
+    assert r["models"]["coercion"]["stages"] == ["post_pause", "pre_pause"]
+    assert r["status"] == "ok"
     assert r["simulation"] is True
 
 

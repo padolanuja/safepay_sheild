@@ -1,0 +1,480 @@
+{
+  "generated_at": "2026-11-23T21:51:33+00:00",
+  "data": "fictional demo users; payees partly derived from RBIH accounts (pseudonymised)",
+  "passed": 13,
+  "total": 13,
+  "scenarios": [
+    {
+      "id": 1,
+      "title": "Ramesh, 62: digital arrest",
+      "expected": [
+        "HOLD"
+      ],
+      "actual": "HOLD",
+      "passed": true,
+      "expected_note": "Key differentiator: mule status insufficient_history; caught by coercion alone.",
+      "asked_questions": true,
+      "pre_pause": {
+        "decision": "HOLD",
+        "matrix_row": "R1",
+        "coercion_band": "high",
+        "coercion_score": 0.9564,
+        "severe": true,
+        "payee_amount_gate": "not_applied",
+        "mule_status": "insufficient_history",
+        "mule_band": null,
+        "splitting": [],
+        "trust_applied": false,
+        "reason": "Serious warning signs: video call with an unknown number for 120 min. For your safety this payment is on a simulated hold.",
+        "latency_ms": 117.3
+      },
+      "post_pause": {
+        "decision": "HOLD",
+        "matrix_row": "R1",
+        "coercion_band": "high",
+        "coercion_score": 0.9998,
+        "severe": true,
+        "payee_amount_gate": "not_applied",
+        "mule_status": "insufficient_history",
+        "mule_band": null,
+        "splitting": [],
+        "trust_applied": false,
+        "reason": "Serious warning signs: video call with an unknown number for 120 min. For your safety this payment is on a simulated hold.",
+        "latency_ms": 18.0
+      }
+    },
+    {
+      "id": 2,
+      "title": "Fake KYC update",
+      "expected": [
+        "HOLD"
+      ],
+      "actual": "HOLD",
+      "passed": true,
+      "expected_note": "Severe device-control indicators.",
+      "asked_questions": true,
+      "pre_pause": {
+        "decision": "HOLD",
+        "matrix_row": "R1",
+        "coercion_band": "high",
+        "coercion_score": 0.9765,
+        "severe": true,
+        "payee_amount_gate": "not_applied",
+        "mule_status": "insufficient_history",
+        "mule_band": null,
+        "splitting": [],
+        "trust_applied": false,
+        "reason": "Serious warning signs: screen sharing is on during the payment; a remote-access app was installed in the last 7 days. For your safety this payment is on a simulated hold.",
+        "latency_ms": 119.6
+      },
+      "post_pause": {
+        "decision": "HOLD",
+        "matrix_row": "R1",
+        "coercion_band": "high",
+        "coercion_score": 0.9991,
+        "severe": true,
+        "payee_amount_gate": "not_applied",
+        "mule_status": "insufficient_history",
+        "mule_band": null,
+        "splitting": [],
+        "trust_applied": false,
+        "reason": "Serious warning signs: screen sharing is on during the payment; a remote-access app was installed in the last 7 days. For your safety this payment is on a simulated hold.",
+        "latency_ms": 17.0
+      }
+    },
+    {
+      "id": 3,
+      "title": "Investment scam: 3rd escalating payment today",
+      "expected": [
+        "HOLD",
+        "WARN"
+      ],
+      "actual": "HOLD",
+      "passed": true,
+      "expected_note": "Mule (high, RBIH-derived) + escalation.",
+      "asked_questions": true,
+      "pre_pause": {
+        "decision": "WARN",
+        "matrix_row": "R3",
+        "coercion_band": "medium",
+        "coercion_score": 0.6494,
+        "severe": false,
+        "payee_amount_gate": "not_applied",
+        "mule_status": "ok",
+        "mule_band": "high",
+        "splitting": [
+          "escalation"
+        ],
+        "trust_applied": false,
+        "reason": "This account shows suspicious money movement, and there are signs this payment may not be your free choice.",
+        "latency_ms": 189.6
+      },
+      "post_pause": {
+        "decision": "HOLD",
+        "matrix_row": "R2",
+        "coercion_band": "high",
+        "coercion_score": 0.8784,
+        "severe": false,
+        "payee_amount_gate": "not_applied",
+        "mule_status": "ok",
+        "mule_band": "high",
+        "splitting": [
+          "escalation"
+        ],
+        "trust_applied": false,
+        "reason": "Several strong signs that someone may be pressuring you to pay.",
+        "latency_ms": 132.6
+      }
+    },
+    {
+      "id": 4,
+      "title": "Job/task scam: escalating task fees",
+      "expected": [
+        "WARN",
+        "HOLD"
+      ],
+      "actual": "HOLD",
+      "passed": true,
+      "expected_note": "Escalation pattern (splitting floor guarantees at least WARN). HOLD accepted: the post-pause model scores 0.999, but 'job_task_fee' appears only on coerced rows in the synthetic data, so that score is optimistic. With purpose 'other' it is still HOLD (0.963).",
+      "asked_questions": true,
+      "pre_pause": {
+        "decision": "WARN",
+        "matrix_row": "R5",
+        "coercion_band": "medium",
+        "coercion_score": 0.3901,
+        "severe": false,
+        "payee_amount_gate": "not_applied",
+        "mule_status": "insufficient_history",
+        "mule_band": null,
+        "splitting": [
+          "escalation"
+        ],
+        "trust_applied": false,
+        "reason": "Some signs that this payment may not be your own free choice. Please check before you pay.",
+        "latency_ms": 82.1
+      },
+      "post_pause": {
+        "decision": "HOLD",
+        "matrix_row": "R2",
+        "coercion_band": "high",
+        "coercion_score": 0.9987,
+        "severe": false,
+        "payee_amount_gate": "not_applied",
+        "mule_status": "insufficient_history",
+        "mule_band": null,
+        "splitting": [
+          "escalation"
+        ],
+        "trust_applied": false,
+        "reason": "Several strong signs that someone may be pressuring you to pay.",
+        "latency_ms": 17.1
+      }
+    },
+    {
+      "id": 5,
+      "title": "Romance scam",
+      "expected": [
+        "WARN"
+      ],
+      "actual": "WARN",
+      "passed": true,
+      "expected_note": "Elevated mule + unusual amount.",
+      "asked_questions": true,
+      "pre_pause": {
+        "decision": "WARN",
+        "matrix_row": "R5",
+        "coercion_band": "medium",
+        "coercion_score": 0.5545,
+        "severe": false,
+        "payee_amount_gate": "not_applied",
+        "mule_status": "ok",
+        "mule_band": "elevated",
+        "splitting": [],
+        "trust_applied": false,
+        "reason": "Some signs that this payment may not be your own free choice. Please check before you pay.",
+        "latency_ms": 185.8
+      },
+      "post_pause": {
+        "decision": "WARN",
+        "matrix_row": "R5",
+        "coercion_band": "medium",
+        "coercion_score": 0.6644,
+        "severe": false,
+        "payee_amount_gate": "not_applied",
+        "mule_status": "ok",
+        "mule_band": "elevated",
+        "splitting": [],
+        "trust_applied": false,
+        "reason": "Some signs that this payment may not be your own free choice. Please check before you pay.",
+        "latency_ms": 124.9
+      }
+    },
+    {
+      "id": 6,
+      "title": "Splitting: 5 x Rs 19,999 in 20 minutes",
+      "expected": [
+        "WARN",
+        "HOLD"
+      ],
+      "actual": "HOLD",
+      "passed": true,
+      "expected_note": "Splitting just under a round limit.",
+      "asked_questions": true,
+      "pre_pause": {
+        "decision": "WARN",
+        "matrix_row": "R5",
+        "coercion_band": "medium",
+        "coercion_score": 0.5505,
+        "severe": false,
+        "payee_amount_gate": "not_applied",
+        "mule_status": "insufficient_history",
+        "mule_band": null,
+        "splitting": [
+          "near_limit_split",
+          "rapid_repeat"
+        ],
+        "trust_applied": false,
+        "reason": "Some signs that this payment may not be your own free choice. Please check before you pay.",
+        "latency_ms": 83.7
+      },
+      "post_pause": {
+        "decision": "HOLD",
+        "matrix_row": "R2",
+        "coercion_band": "high",
+        "coercion_score": 0.8647,
+        "severe": false,
+        "payee_amount_gate": "not_applied",
+        "mule_status": "insufficient_history",
+        "mule_band": null,
+        "splitting": [
+          "near_limit_split",
+          "rapid_repeat"
+        ],
+        "trust_applied": false,
+        "reason": "Several strong signs that someone may be pressuring you to pay.",
+        "latency_ms": 18.2
+      }
+    },
+    {
+      "id": 7,
+      "title": "Genuine: hospital bill",
+      "expected": [
+        "WARN"
+      ],
+      "actual": "WARN",
+      "passed": true,
+      "expected_note": "Hard negative: WARN, not HOLD.",
+      "asked_questions": true,
+      "pre_pause": {
+        "decision": "WARN",
+        "matrix_row": "R6b",
+        "coercion_band": "low",
+        "coercion_score": 0.0,
+        "severe": false,
+        "payee_amount_gate": "applied",
+        "mule_status": "ok",
+        "mule_band": "low",
+        "splitting": [],
+        "trust_applied": false,
+        "reason": "This payment is much larger than usual and goes to someone you haven't paid before. Please check the details before paying. This alone is not a sign of a scam.",
+        "latency_ms": 191.5
+      },
+      "post_pause": {
+        "decision": "WARN",
+        "matrix_row": "R6b",
+        "coercion_band": "low",
+        "coercion_score": 0.0,
+        "severe": false,
+        "payee_amount_gate": "applied",
+        "mule_status": "ok",
+        "mule_band": "low",
+        "splitting": [],
+        "trust_applied": false,
+        "reason": "This payment is much larger than usual and goes to someone you haven't paid before. Please check the details before paying. This alone is not a sign of a scam.",
+        "latency_ms": 134.0
+      }
+    },
+    {
+      "id": 8,
+      "title": "Genuine: son paying mother while on a call with her",
+      "expected": [
+        "ALLOW"
+      ],
+      "actual": "ALLOW",
+      "passed": true,
+      "expected_note": "Trusted beneficiary, known caller.",
+      "asked_questions": false,
+      "pre_pause": {
+        "decision": "ALLOW",
+        "matrix_row": "R7",
+        "coercion_band": "low",
+        "coercion_score": 0.1007,
+        "severe": false,
+        "payee_amount_gate": "not_applied",
+        "mule_status": "ok",
+        "mule_band": "low",
+        "splitting": [],
+        "trust_applied": false,
+        "reason": "No warning signs found.",
+        "latency_ms": 153.0
+      },
+      "post_pause": null
+    },
+    {
+      "id": 9,
+      "title": "Genuine: rent matching a planned payment",
+      "expected": [
+        "ALLOW"
+      ],
+      "actual": "ALLOW",
+      "passed": true,
+      "expected_note": "Planned payment + trusted beneficiary.",
+      "asked_questions": false,
+      "pre_pause": {
+        "decision": "ALLOW",
+        "matrix_row": "R7",
+        "coercion_band": "low",
+        "coercion_score": 0.0,
+        "severe": false,
+        "payee_amount_gate": "applied",
+        "mule_status": "ok",
+        "mule_band": "low",
+        "splitting": [],
+        "trust_applied": false,
+        "reason": "No warning signs found.",
+        "latency_ms": 157.1
+      },
+      "post_pause": null
+    },
+    {
+      "id": 10,
+      "title": "Genuine payer paying a mule account",
+      "expected": [
+        "WARN"
+      ],
+      "actual": "WARN",
+      "passed": true,
+      "expected_note": "Mule warning only.",
+      "asked_questions": true,
+      "pre_pause": {
+        "decision": "WARN",
+        "matrix_row": "R6",
+        "coercion_band": "low",
+        "coercion_score": 0.0,
+        "severe": false,
+        "payee_amount_gate": "applied",
+        "mule_status": "ok",
+        "mule_band": "high",
+        "splitting": [],
+        "trust_applied": false,
+        "reason": "This account shows suspicious money movement.",
+        "latency_ms": 151.7
+      },
+      "post_pause": {
+        "decision": "WARN",
+        "matrix_row": "R6",
+        "coercion_band": "low",
+        "coercion_score": 0.0,
+        "severe": false,
+        "payee_amount_gate": "applied",
+        "mule_status": "ok",
+        "mule_band": "high",
+        "splitting": [],
+        "trust_applied": false,
+        "reason": "This account shows suspicious money movement.",
+        "latency_ms": 135.3
+      }
+    },
+    {
+      "id": 11,
+      "title": "Everyday grocery payment",
+      "expected": [
+        "ALLOW"
+      ],
+      "actual": "ALLOW",
+      "passed": true,
+      "expected_note": "Everyday payment.",
+      "asked_questions": false,
+      "pre_pause": {
+        "decision": "ALLOW",
+        "matrix_row": "R7",
+        "coercion_band": "low",
+        "coercion_score": 0.0777,
+        "severe": false,
+        "payee_amount_gate": "not_applied",
+        "mule_status": "ok",
+        "mule_band": "low",
+        "splitting": [],
+        "trust_applied": false,
+        "reason": "No warning signs found.",
+        "latency_ms": 160.9
+      },
+      "post_pause": null
+    },
+    {
+      "id": 12,
+      "title": "Payee with no transaction history",
+      "expected": [
+        "ALLOW"
+      ],
+      "actual": "ALLOW",
+      "passed": true,
+      "expected_note": "Mule status insufficient_history; decided on coercion signals only, and the explanation says so.",
+      "asked_questions": false,
+      "pre_pause": {
+        "decision": "ALLOW",
+        "matrix_row": "R7",
+        "coercion_band": "low",
+        "coercion_score": 0.0,
+        "severe": false,
+        "payee_amount_gate": "applied",
+        "mule_status": "insufficient_history",
+        "mule_band": null,
+        "splitting": [],
+        "trust_applied": false,
+        "reason": "No warning signs found.",
+        "latency_ms": 78.7
+      },
+      "post_pause": null
+    },
+    {
+      "id": 13,
+      "title": "Trusted beneficiary, but screen sharing is on",
+      "expected": [
+        "HOLD"
+      ],
+      "actual": "HOLD",
+      "passed": true,
+      "expected_note": "Trust never overrides a severe indicator.",
+      "asked_questions": true,
+      "pre_pause": {
+        "decision": "HOLD",
+        "matrix_row": "R1",
+        "coercion_band": "high",
+        "coercion_score": 0.5937,
+        "severe": true,
+        "payee_amount_gate": "not_applied",
+        "mule_status": "ok",
+        "mule_band": "low",
+        "splitting": [],
+        "trust_applied": false,
+        "reason": "Serious warning signs: screen sharing is on during the payment. For your safety this payment is on a simulated hold.",
+        "latency_ms": 152.2
+      },
+      "post_pause": {
+        "decision": "HOLD",
+        "matrix_row": "R1",
+        "coercion_band": "high",
+        "coercion_score": 0.6215,
+        "severe": true,
+        "payee_amount_gate": "not_applied",
+        "mule_status": "ok",
+        "mule_band": "low",
+        "splitting": [],
+        "trust_applied": false,
+        "reason": "Serious warning signs: screen sharing is on during the payment. For your safety this payment is on a simulated hold.",
+        "latency_ms": 129.9
+      }
+    }
+  ]
+}

@@ -60,6 +60,37 @@ class NotFound(LookupError):
     pass
 
 
+class ModelUnavailable(RuntimeError):
+    """The coercion model or its validated cut-offs are missing: refuse to score (API -> 503)."""
+
+
+def score_coercion(ctx: dict, ml: dict, card: dict, stage: str) -> dict:
+    """Module B for one payment: answer check, rules, ML pressure gate and combined band.
+
+    `ml` is CoercionModel.predict() output (or the same fields from predict_batch).
+    Shared by assess() and scripts/evaluate_system.py, so both use identical logic.
+    """
+    contradictions = check_answers(ctx)
+    ctx = {**ctx, "contradictions": contradictions}
+    indicators = evaluate_rules(ctx)
+    points, severe = rule_points(indicators), has_severe(indicators)
+    cut, cap = card["cutoffs"][stage], card["rule_score_cap"][stage]
+    # Pressure gate for the ML model (mirrors the rules' gate): with no pressure indicator,
+    # if most of the model's risk-raising evidence is the payee and the amount, the model's
+    # concern is not counted. An unknown payee or a high amount can never establish coercion
+    # on its own; the fusion engine's R6b may still ask the user to verify a large first payment.
+    pressure = any(i["kind"] == "pressure" and i["counted"] for i in indicators)
+    ml_in, gate = None, "not_applied"
+    if ml.get("status") == "ok":
+        ml_in = ml["ml_probability"]
+        if not pressure and ml["payee_amount_share_of_risk"] >= config.PAYEE_AMOUNT_ONLY_SHARE:
+            ml_in, gate = None, "applied"
+    score = combine(points, ml_in, severe, cut, cap)
+    return {**score, "severe": severe, "indicators": indicators, "contradictions": contradictions,
+            "strong_contradiction": any(c["strength"] == "strong" for c in contradictions), "ml": ml,
+            "pressure_present": pressure, "payee_amount_gate": gate}
+
+
 # --------------------------------------------------------------------- validation
 def validate_situation(s) -> dict:
     if not isinstance(s, dict):
@@ -163,30 +194,11 @@ def assess(conn, mule_predictor, coercion_model, *, user_id, payee_vpa, amount, 
             ctx[k] = _tag(src, k, v, "user_answer")
 
     # ---- Module B: coercion
-    contradictions = check_answers(ctx)
-    ctx["contradictions"] = contradictions
-    indicators = evaluate_rules(ctx)
-    points, severe = rule_points(indicators), has_severe(indicators)
-    ml = coercion_model.predict(ctx, stage) if coercion_model.available else \
-        {"status": "unavailable", "reason": coercion_model.error}
-    card = coercion_model.card if coercion_model.available else None
-    if card is None:
-        raise RuntimeError("coercion model card unavailable: cut-offs were never validated; refusing to score")
-    cut, cap = card["cutoffs"][stage], card["rule_score_cap"][stage]
-    # Pressure gate for the ML model (mirrors the rules' gate): with no pressure indicator,
-    # if most of the model's risk-raising evidence is the payee and the amount, the model's
-    # concern is not counted. An unknown payee or a high amount can never establish coercion
-    # on its own; the fusion engine's R6b may still ask the user to verify a large first payment.
-    pressure = any(i["kind"] == "pressure" and i["counted"] for i in indicators)
-    ml_in, gate = None, "not_applied"
-    if ml["status"] == "ok":
-        ml_in = ml["ml_probability"]
-        if not pressure and ml["payee_amount_share_of_risk"] >= config.PAYEE_AMOUNT_ONLY_SHARE:
-            ml_in, gate = None, "applied"
-    score = combine(points, ml_in, severe, cut, cap)
-    coercion = {**score, "severe": severe, "indicators": indicators, "contradictions": contradictions,
-                "strong_contradiction": any(c["strength"] == "strong" for c in contradictions), "ml": ml,
-                "pressure_present": pressure, "payee_amount_gate": gate}
+    if not coercion_model.available:
+        raise ModelUnavailable(coercion_model.error or "coercion model unavailable")
+    ml = coercion_model.predict(ctx, stage)
+    coercion = score_coercion(ctx, ml, coercion_model.card, stage)
+    cap = coercion["rule_score_cap"]
 
     # ---- Module A: mule
     mule = mule_predictor.predict_for_payee(conn, vpa) if payee else {

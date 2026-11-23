@@ -126,6 +126,18 @@ class CoercionModel:
     def cutoffs(self, stage: str) -> dict:
         return self.card["cutoffs"][stage]
 
+    def predict_batch(self, df: pd.DataFrame, stage: str) -> pd.DataFrame:
+        """Vectorised probability + payee/amount share for many rows (evaluation only).
+        Same model, same SHAP explainer and same share formula as predict()."""
+        b = self.models[stage]
+        X = encode(df, stage)[b["features"]]
+        prob = b["model"].predict_proba(X)[:, 1]
+        pos = np.clip(self.explainers[stage].contributions(X), 0, None)
+        pa_mask = np.array([f in PAYEE_AMOUNT_FEATURES for f in b["features"]])
+        tot = pos.sum(axis=1)
+        share = np.divide(pos[:, pa_mask].sum(axis=1), tot, out=np.zeros_like(tot), where=tot > 0)
+        return pd.DataFrame({"ml_probability": prob, "payee_amount_share_of_risk": share}, index=df.index)
+
     def predict(self, ctx: dict, stage: str, top_n: int = 6) -> dict:
         t0 = time.perf_counter()
         if not self.available:

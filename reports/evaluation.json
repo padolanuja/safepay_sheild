@@ -1,0 +1,767 @@
+{
+  "generated_at": "2026-11-23T21:50:38+00:00",
+  "caveat": "Synthetic coercion data \u2014 feasibility only, not real-world accuracy. Mule scores on RBIH accounts may be optimistic (possible overlap with training data). Two coercion rules were revised after the test set had been seen once, so these numbers may be slightly optimistic.",
+  "datasets": {
+    "rows": "data/coercion/safepay_coercion_synthetic.csv \u2014 30% test split (seed 42)",
+    "payee_profiles": "reports/rbih_mule_eval_sample.csv (RBIH-NFPC Phase 2 labelled sample)"
+  },
+  "design": "Rows: the 30% held-out TEST split of the synthetic coercion CSV (same split and seed as\n  scripts/train_coercion_model.py, so no row was used for training or cut-off selection).\n  Each row is paired with a payee profile (seed 42):\n    payee profiles  new_no_history  a payee with < MULE_MIN_HISTORY_TXNS transactions\n                                    (mule status insufficient_history; the model isn't called)\n                    rbih_legit      a real RBIH account labelled legitimate (from the RBIH\n                                    evaluation sample), with its actual mule-model score\n                    rbih_mule       a real RBIH account labelled mule, with its actual score\n    pairing ratios (by row type)\n      coerced, new payee     60% new_no_history / 25% rbih_legit / 15% rbih_mule\n      coerced, known payee   80% rbih_legit / 20% rbih_mule\n      genuine, new payee     15% new_no_history / 80% rbih_legit / 5% rbih_mule\n      genuine, known payee   97% rbih_legit / 3% rbih_mule\n  Why: fresh or rented mule accounts often have no history or no flags yet (DATA_CARD:\n  about 55% of mule accounts are newly opened, and only 30% have complaints at payment time).\n  rbih_legit paired with a coerced row stands in for an unflagged mule account.\n  Ground truth: should_intervene = label_coerced OR payee is an RBIH-labelled mule.\n\nAPPROACHES (all on the same rows)\n  rule_new_payee_5x     DATA_CARD baseline: new payee AND amount >= 5x usual\n  rule_new_unknown_call DATA_CARD baseline: new payee AND on a call with an unknown number\n  mule_only             mule model at 0.10 (insufficient_history = not flagged)\n  coercion_only         rules + ML + gates, fusion with the mule input removed\n  combined              full SafePay Shield fusion (the two-stage flow)\n  \"Intervene\" = any decision other than ALLOW. HOLD-level figures are reported separately.\n\nNOT COVERED: splitting detection (the CSV has no individual earlier payments, only 24 h\nvelocity totals), trusted beneficiaries / planned payments and the victim checklist\n(not in the CSV). Mule scores on RBIH accounts may be optimistic (possible overlap with\nthe mule model's training data). Results show feasibility, not real-world accuracy.",
+  "joint_set": {
+    "rows": 6000,
+    "seed": 42,
+    "pairing_ratios": {
+      "coerced=1,payee_is_new=1": {
+        "new_no_history": 0.6,
+        "rbih_legit": 0.25,
+        "rbih_mule": 0.15
+      },
+      "coerced=1,payee_is_new=0": {
+        "new_no_history": 0.0,
+        "rbih_legit": 0.8,
+        "rbih_mule": 0.2
+      },
+      "coerced=0,payee_is_new=1": {
+        "new_no_history": 0.15,
+        "rbih_legit": 0.8,
+        "rbih_mule": 0.05
+      },
+      "coerced=0,payee_is_new=0": {
+        "new_no_history": 0.0,
+        "rbih_legit": 0.97,
+        "rbih_mule": 0.03
+      }
+    },
+    "payee_profiles": {
+      "rbih_legit": 5064,
+      "new_no_history": 615,
+      "rbih_mule": 321
+    },
+    "pools": {
+      "rbih_legit_pool": 4600,
+      "rbih_mule_pool": 151
+    },
+    "should_intervene": 969,
+    "coerced": 770,
+    "genuine_to_mule": 199
+  },
+  "approaches": {
+    "rule_new_payee_5x": {
+      "name": "Rule: new payee + 5x amount",
+      "intervene": {
+        "tp": 582,
+        "fp": 641,
+        "fn": 387,
+        "precision": 0.4759,
+        "recall": 0.6006,
+        "f1": 0.531,
+        "fp_rate": 0.1274,
+        "fp_rate_hard_negatives": 0.4844
+      },
+      "hold": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 969,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "fp_rate": 0.0,
+        "fp_rate_hard_negatives": 0.0
+      },
+      "decision_share": {
+        "ALLOW": 0.7962,
+        "WARN": 0.2038,
+        "HOLD": 0.0
+      },
+      "recall_by_scam_type": {
+        "bank_kyc_impersonation": {
+          "intervene": 0.699,
+          "hold": 0.0,
+          "n": 146
+        },
+        "courier_customs": {
+          "intervene": 0.768,
+          "hold": 0.0,
+          "n": 56
+        },
+        "digital_arrest": {
+          "intervene": 0.876,
+          "hold": 0.0,
+          "n": 97
+        },
+        "family_emergency_voiceclone": {
+          "intervene": 0.828,
+          "hold": 0.0,
+          "n": 64
+        },
+        "investment_trading": {
+          "intervene": 0.82,
+          "hold": 0.0,
+          "n": 189
+        },
+        "job_task": {
+          "intervene": 0.527,
+          "hold": 0.0,
+          "n": 112
+        },
+        "none": {
+          "intervene": 0.268,
+          "hold": 0.0,
+          "n": 56
+        },
+        "romance": {
+          "intervene": 0.7,
+          "hold": 0.0,
+          "n": 50
+        }
+      },
+      "fp_rate_by_hard_negative": {
+        "family_call_while_paying": {
+          "intervene": 0.05,
+          "hold": 0.0,
+          "n": 300
+        },
+        "fd_broken_for_genuine_need": {
+          "intervene": 0.554,
+          "hold": 0.0,
+          "n": 121
+        },
+        "first_time_investment_platform": {
+          "intervene": 0.749,
+          "hold": 0.0,
+          "n": 215
+        },
+        "large_new_payee_genuine": {
+          "intervene": 0.96,
+          "hold": 0.0,
+          "n": 329
+        },
+        "night_urgent_genuine": {
+          "intervene": 0.139,
+          "hold": 0.0,
+          "n": 115
+        },
+        "senior_paying_family": {
+          "intervene": 0.225,
+          "hold": 0.0,
+          "n": 200
+        }
+      }
+    },
+    "rule_new_unknown_call": {
+      "name": "Rule: new payee + unknown call",
+      "intervene": {
+        "tp": 261,
+        "fp": 29,
+        "fn": 708,
+        "precision": 0.9,
+        "recall": 0.2693,
+        "f1": 0.4146,
+        "fp_rate": 0.0058,
+        "fp_rate_hard_negatives": 0.0164
+      },
+      "hold": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 969,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "fp_rate": 0.0,
+        "fp_rate_hard_negatives": 0.0
+      },
+      "decision_share": {
+        "ALLOW": 0.9517,
+        "WARN": 0.0483,
+        "HOLD": 0.0
+      },
+      "recall_by_scam_type": {
+        "bank_kyc_impersonation": {
+          "intervene": 0.637,
+          "hold": 0.0,
+          "n": 146
+        },
+        "courier_customs": {
+          "intervene": 0.643,
+          "hold": 0.0,
+          "n": 56
+        },
+        "digital_arrest": {
+          "intervene": 0.649,
+          "hold": 0.0,
+          "n": 97
+        },
+        "family_emergency_voiceclone": {
+          "intervene": 0.5,
+          "hold": 0.0,
+          "n": 64
+        },
+        "investment_trading": {
+          "intervene": 0.09,
+          "hold": 0.0,
+          "n": 189
+        },
+        "job_task": {
+          "intervene": 0.062,
+          "hold": 0.0,
+          "n": 112
+        },
+        "none": {
+          "intervene": 0.036,
+          "hold": 0.0,
+          "n": 56
+        },
+        "romance": {
+          "intervene": 0.2,
+          "hold": 0.0,
+          "n": 50
+        }
+      },
+      "fp_rate_by_hard_negative": {
+        "family_call_while_paying": {
+          "intervene": 0.033,
+          "hold": 0.0,
+          "n": 300
+        },
+        "fd_broken_for_genuine_need": {
+          "intervene": 0.025,
+          "hold": 0.0,
+          "n": 121
+        },
+        "first_time_investment_platform": {
+          "intervene": 0.014,
+          "hold": 0.0,
+          "n": 215
+        },
+        "large_new_payee_genuine": {
+          "intervene": 0.012,
+          "hold": 0.0,
+          "n": 329
+        },
+        "night_urgent_genuine": {
+          "intervene": 0.009,
+          "hold": 0.0,
+          "n": 115
+        },
+        "senior_paying_family": {
+          "intervene": 0.0,
+          "hold": 0.0,
+          "n": 200
+        }
+      }
+    },
+    "mule_only": {
+      "name": "Mule model only",
+      "intervene": {
+        "tp": 178,
+        "fp": 77,
+        "fn": 791,
+        "precision": 0.698,
+        "recall": 0.1837,
+        "f1": 0.2908,
+        "fp_rate": 0.0153,
+        "fp_rate_hard_negatives": 0.0133
+      },
+      "hold": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 969,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "fp_rate": 0.0,
+        "fp_rate_hard_negatives": 0.0
+      },
+      "decision_share": {
+        "ALLOW": 0.9575,
+        "WARN": 0.0425,
+        "HOLD": 0.0
+      },
+      "recall_by_scam_type": {
+        "bank_kyc_impersonation": {
+          "intervene": 0.11,
+          "hold": 0.0,
+          "n": 146
+        },
+        "courier_customs": {
+          "intervene": 0.0,
+          "hold": 0.0,
+          "n": 56
+        },
+        "digital_arrest": {
+          "intervene": 0.134,
+          "hold": 0.0,
+          "n": 97
+        },
+        "family_emergency_voiceclone": {
+          "intervene": 0.062,
+          "hold": 0.0,
+          "n": 64
+        },
+        "investment_trading": {
+          "intervene": 0.079,
+          "hold": 0.0,
+          "n": 189
+        },
+        "job_task": {
+          "intervene": 0.054,
+          "hold": 0.0,
+          "n": 112
+        },
+        "none": {
+          "intervene": 0.089,
+          "hold": 0.0,
+          "n": 56
+        },
+        "romance": {
+          "intervene": 0.16,
+          "hold": 0.0,
+          "n": 50
+        }
+      },
+      "fp_rate_by_hard_negative": {
+        "family_call_while_paying": {
+          "intervene": 0.013,
+          "hold": 0.0,
+          "n": 300
+        },
+        "fd_broken_for_genuine_need": {
+          "intervene": 0.008,
+          "hold": 0.0,
+          "n": 121
+        },
+        "first_time_investment_platform": {
+          "intervene": 0.014,
+          "hold": 0.0,
+          "n": 215
+        },
+        "large_new_payee_genuine": {
+          "intervene": 0.018,
+          "hold": 0.0,
+          "n": 329
+        },
+        "night_urgent_genuine": {
+          "intervene": 0.017,
+          "hold": 0.0,
+          "n": 115
+        },
+        "senior_paying_family": {
+          "intervene": 0.005,
+          "hold": 0.0,
+          "n": 200
+        }
+      }
+    },
+    "coercion_only": {
+      "name": "Coercion only",
+      "intervene": {
+        "tp": 740,
+        "fp": 956,
+        "fn": 229,
+        "precision": 0.4363,
+        "recall": 0.7637,
+        "f1": 0.5553,
+        "fp_rate": 0.19,
+        "fp_rate_hard_negatives": 0.6484
+      },
+      "hold": {
+        "tp": 619,
+        "fp": 200,
+        "fn": 350,
+        "precision": 0.7558,
+        "recall": 0.6388,
+        "f1": 0.6924,
+        "fp_rate": 0.0398,
+        "fp_rate_hard_negatives": 0.1016
+      },
+      "decision_share": {
+        "ALLOW": 0.7173,
+        "WARN": 0.1462,
+        "HOLD": 0.1365
+      },
+      "recall_by_scam_type": {
+        "bank_kyc_impersonation": {
+          "intervene": 0.986,
+          "hold": 0.973,
+          "n": 146
+        },
+        "courier_customs": {
+          "intervene": 1.0,
+          "hold": 1.0,
+          "n": 56
+        },
+        "digital_arrest": {
+          "intervene": 1.0,
+          "hold": 0.99,
+          "n": 97
+        },
+        "family_emergency_voiceclone": {
+          "intervene": 0.969,
+          "hold": 0.781,
+          "n": 64
+        },
+        "investment_trading": {
+          "intervene": 0.947,
+          "hold": 0.82,
+          "n": 189
+        },
+        "job_task": {
+          "intervene": 0.839,
+          "hold": 0.732,
+          "n": 112
+        },
+        "none": {
+          "intervene": 0.321,
+          "hold": 0.089,
+          "n": 56
+        },
+        "romance": {
+          "intervene": 0.9,
+          "hold": 0.48,
+          "n": 50
+        }
+      },
+      "fp_rate_by_hard_negative": {
+        "family_call_while_paying": {
+          "intervene": 0.243,
+          "hold": 0.057,
+          "n": 300
+        },
+        "fd_broken_for_genuine_need": {
+          "intervene": 0.909,
+          "hold": 0.091,
+          "n": 121
+        },
+        "first_time_investment_platform": {
+          "intervene": 0.8,
+          "hold": 0.13,
+          "n": 215
+        },
+        "large_new_payee_genuine": {
+          "intervene": 0.988,
+          "hold": 0.191,
+          "n": 329
+        },
+        "night_urgent_genuine": {
+          "intervene": 0.452,
+          "hold": 0.017,
+          "n": 115
+        },
+        "senior_paying_family": {
+          "intervene": 0.49,
+          "hold": 0.045,
+          "n": 200
+        }
+      }
+    },
+    "combined": {
+      "name": "SafePay Shield (combined)",
+      "intervene": {
+        "tp": 831,
+        "fp": 1016,
+        "fn": 138,
+        "precision": 0.4499,
+        "recall": 0.8576,
+        "f1": 0.5902,
+        "fp_rate": 0.2019,
+        "fp_rate_hard_negatives": 0.6516
+      },
+      "hold": {
+        "tp": 621,
+        "fp": 200,
+        "fn": 348,
+        "precision": 0.7564,
+        "recall": 0.6409,
+        "f1": 0.6939,
+        "fp_rate": 0.0398,
+        "fp_rate_hard_negatives": 0.1016
+      },
+      "decision_share": {
+        "ALLOW": 0.6922,
+        "WARN": 0.171,
+        "HOLD": 0.1368
+      },
+      "recall_by_scam_type": {
+        "bank_kyc_impersonation": {
+          "intervene": 0.986,
+          "hold": 0.973,
+          "n": 146
+        },
+        "courier_customs": {
+          "intervene": 1.0,
+          "hold": 1.0,
+          "n": 56
+        },
+        "digital_arrest": {
+          "intervene": 1.0,
+          "hold": 0.99,
+          "n": 97
+        },
+        "family_emergency_voiceclone": {
+          "intervene": 0.969,
+          "hold": 0.781,
+          "n": 64
+        },
+        "investment_trading": {
+          "intervene": 0.952,
+          "hold": 0.82,
+          "n": 189
+        },
+        "job_task": {
+          "intervene": 0.848,
+          "hold": 0.732,
+          "n": 112
+        },
+        "none": {
+          "intervene": 0.375,
+          "hold": 0.089,
+          "n": 56
+        },
+        "romance": {
+          "intervene": 0.92,
+          "hold": 0.5,
+          "n": 50
+        }
+      },
+      "fp_rate_by_hard_negative": {
+        "family_call_while_paying": {
+          "intervene": 0.253,
+          "hold": 0.057,
+          "n": 300
+        },
+        "fd_broken_for_genuine_need": {
+          "intervene": 0.909,
+          "hold": 0.091,
+          "n": 121
+        },
+        "first_time_investment_platform": {
+          "intervene": 0.8,
+          "hold": 0.13,
+          "n": 215
+        },
+        "large_new_payee_genuine": {
+          "intervene": 0.988,
+          "hold": 0.191,
+          "n": 329
+        },
+        "night_urgent_genuine": {
+          "intervene": 0.452,
+          "hold": 0.017,
+          "n": 115
+        },
+        "senior_paying_family": {
+          "intervene": 0.495,
+          "hold": 0.045,
+          "n": 200
+        }
+      }
+    }
+  },
+  "headline": {
+    "question": "How many coerced payments to clean payees does mule-only miss, and how many of those does the combined system catch?",
+    "coerced_to_clean_payees": 648,
+    "missed_by_mule_only": 644,
+    "of_those_caught_by_combined": 584,
+    "of_those_caught_by_combined_pct": 90.7,
+    "of_those_held_by_combined": 515,
+    "of_those_held_by_combined_pct": 80.0,
+    "coerced_to_payees_with_no_history": 374,
+    "no_history_caught_by_combined_pct": 97.6,
+    "genuine_payer_to_rbih_mule": 199,
+    "genuine_payer_to_mule_caught": {
+      "mule_only": 55.8,
+      "coercion_only": 22.6,
+      "combined": 65.3
+    }
+  },
+  "latency": {
+    "calls": 1000,
+    "endpoint": "POST /api/assess (pre_pause, includes the DB write)",
+    "method": "Flask test client, in-process (no network); cycles through the 13 scenario inputs",
+    "wall_ms": {
+      "p50": 155.8,
+      "p95": 176.3,
+      "max": 289.6
+    },
+    "server_reported_ms": {
+      "p50": 150.7,
+      "p95": 170.3
+    }
+  },
+  "mule_model_rbih": {
+    "generated_at": "2026-11-23T21:05:22+00:00",
+    "dataset": "RBIH-NFPC Phase 2 (train_labels.parquet + transactions/)",
+    "caveat": "may be optimistic (possible overlap with training data)",
+    "caveat_detail": "The mule model was trained on this dataset and its train/test split is unknown; these labelled accounts may have been seen in training. Labels may also contain noise/red-herrings (RBIH README).",
+    "feature_definitions": "safepay/mule/features.py (reconstructed; original code not provided)",
+    "sample": {
+      "method": "20 random contiguous parts (seed 42) + scattered part(s) for complete histories; boundary accounts dropped; labelled accounts only",
+      "parts": [
+        "transactions\\batch-1\\part_0033.parquet",
+        "transactions\\batch-1\\part_0034.parquet",
+        "transactions\\batch-1\\part_0037.parquet",
+        "transactions\\batch-1\\part_0051.parquet",
+        "transactions\\batch-1\\part_0078.parquet",
+        "transactions\\batch-2\\part_0165.parquet",
+        "transactions\\batch-2\\part_0167.parquet",
+        "transactions\\batch-2\\part_0178.parquet",
+        "transactions\\batch-3\\part_0202.parquet",
+        "transactions\\batch-3\\part_0204.parquet",
+        "transactions\\batch-3\\part_0248.parquet",
+        "transactions\\batch-3\\part_0268.parquet",
+        "transactions\\batch-3\\part_0280.parquet",
+        "transactions\\batch-3\\part_0286.parquet",
+        "transactions\\batch-3\\part_0292.parquet",
+        "transactions\\batch-3\\part_0297.parquet",
+        "transactions\\batch-4\\part_0308.parquet",
+        "transactions\\batch-4\\part_0328.parquet",
+        "transactions\\batch-4\\part_0331.parquet",
+        "transactions\\batch-4\\part_0378.parquet",
+        "transactions\\batch-4\\part_0396.parquet"
+      ],
+      "transactions": 11904231,
+      "accounts": 4751,
+      "mules": 151,
+      "legitimate": 4600,
+      "mule_rate_sample": 0.0318,
+      "mule_rate_all_labels": 0.0279
+    },
+    "threshold": 0.1,
+    "metrics_at_threshold": {
+      "tp": 80,
+      "fp": 71,
+      "tn": 4529,
+      "fn": 71,
+      "precision": 0.5298,
+      "recall": 0.5298,
+      "f1": 0.5298,
+      "false_positive_rate": 0.0154
+    },
+    "roc_auc": 0.9088,
+    "pr_auc": 0.5527,
+    "band_share": {
+      "low": 0.9682,
+      "elevated": 0.0267,
+      "high": 0.0051
+    },
+    "band_share_mules": {
+      "low": 0.4702,
+      "elevated": 0.3775,
+      "high": 0.1523
+    },
+    "score_quantiles": {
+      "mules": {
+        "0.1": 0.007,
+        "0.5": 0.107,
+        "0.9": 0.527
+      },
+      "legitimate": {
+        "0.5": 0.0,
+        "0.9": 0.02,
+        "0.99": 0.12
+      }
+    },
+    "recall_by_alert_reason": [
+      {
+        "alert_reason": "Routine Investigation",
+        "recall": 0.5,
+        "n": 30
+      },
+      {
+        "alert_reason": "Geographic Anomaly Detected",
+        "recall": 0.611,
+        "n": 18
+      },
+      {
+        "alert_reason": "MCC-Amount Distribution Anomaly",
+        "recall": 0.692,
+        "n": 13
+      },
+      {
+        "alert_reason": "Rapid Movement of Funds",
+        "recall": 0.385,
+        "n": 13
+      },
+      {
+        "alert_reason": "High-Value Activity on New Account",
+        "recall": 0.5,
+        "n": 12
+      },
+      {
+        "alert_reason": "Structuring Transactions Below Threshold",
+        "recall": 0.3,
+        "n": 10
+      },
+      {
+        "alert_reason": "Dormant Account Reactivation",
+        "recall": 0.556,
+        "n": 9
+      },
+      {
+        "alert_reason": "Round Amount Pattern",
+        "recall": 0.714,
+        "n": 7
+      },
+      {
+        "alert_reason": "Unusual Fund Flow Pattern",
+        "recall": 0.333,
+        "n": 6
+      },
+      {
+        "alert_reason": "Branch Cluster Investigation",
+        "recall": 0.6,
+        "n": 5
+      },
+      {
+        "alert_reason": "Salary Cycle Anomaly",
+        "recall": 0.8,
+        "n": 5
+      },
+      {
+        "alert_reason": "Layered Transaction Pattern",
+        "recall": 0.4,
+        "n": 5
+      },
+      {
+        "alert_reason": "Income-Transaction Mismatch",
+        "recall": 0.75,
+        "n": 4
+      },
+      {
+        "alert_reason": "Post-Contact-Update Spike",
+        "recall": 0.667,
+        "n": 3
+      }
+    ],
+    "feature_medians": {
+      "total_transactions": 1955.0,
+      "total_debit": 27509037.1,
+      "total_credit": 23483281.4,
+      "avg_transaction_amount": 25451.0,
+      "unique_counterparties": 18.0,
+      "upi_transaction_count": 1418.0,
+      "incoming_counterparties": 18.0,
+      "outgoing_counterparties": 17.0,
+      "reversal_count": 10.0
+    },
+    "runtime_sec": 42.3
+  },
+  "not_covered": [
+    "splitting detection (no individual earlier payments in the CSV)",
+    "trusted beneficiaries / planned payments",
+    "victim checklist answers"
+  ],
+  "runtime_sec": 395.5,
+  "charts": [
+    "eval_comparison.png",
+    "eval_recall_by_scam_type.png",
+    "eval_fp_by_hard_negative.png"
+  ],
+  "known_limitations": [
+    {
+      "id": "hard_negative_warn_rate",
+      "finding": "SafePay Shield interrupts (WARN or HOLD) 65% of genuine 'risky-looking' payments (hard negatives), above the simple new-payee + 5x rule (48%). Most of this is WARN: only 10% are held. Worst types: large new payee genuine 99% (HOLD 19%), fd broken for genuine need 91% (HOLD 9%).",
+      "cause": "The first-pass WARN cut-off was chosen for 90% recall on validation (a screening level), and the unusual-payment check (R6b) asks to verify every first payment of 5x the usual amount or more.",
+      "planned_fix": "Re-tune the first-pass WARN cut-off and the unusual-payment (R6b) threshold on the VALIDATION split (not the test set), targeting a stated hard-negative WARN budget, and disclose it as a further post-test change. Thresholds were deliberately NOT changed in this version."
+    }
+  ]
+}

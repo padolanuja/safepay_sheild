@@ -69,6 +69,25 @@ coercion signals alone. Evidence: `scripts/probe_mule_history.py` →
   numbers may be slightly optimistic.** Details are in `models/coercion_model_card.json`
   → `rule_revisions`.
 
+## Known limitation: too many WARNs on genuine "risky-looking" payments
+
+From `scripts/evaluate_system.py` (`reports/evaluation.json` → `known_limitations`):
+
+- SafePay Shield interrupts (WARN or HOLD) **65% of hard negatives**: genuine payments built to
+  look risky. That is more than the simple "new payee + 5× amount" rule (48%).
+- Most of these are **WARN** (a pause with questions). Only **10% are held**.
+- The worst types are a large genuine payment to a new payee (99% WARN or HOLD, 19% HOLD) and an
+  FD broken for a genuine need (91%, 9% HOLD).
+
+**Why:** the first-pass WARN cut-off was chosen on validation data for 90% recall, which makes it a
+screening level. On top of that, the unusual-payment check (R6b) asks the user to verify every first
+payment of 5× their usual amount or more.
+
+**Planned fix (not done in this version):** re-tune the first-pass WARN cut-off and the R6b
+threshold on the **validation** split, never the test set, against a stated hard-negative WARN
+budget. Disclose it as a further change made after the test set was seen. Thresholds were
+deliberately left unchanged here.
+
 ## Privacy
 
 Only fictional demo users. No UPI PINs, OTPs, passwords, call audio, screen content or
