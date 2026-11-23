@@ -1,0 +1,56 @@
+{
+  "purpose": "evidence for MULE_MIN_HISTORY_TXNS",
+  "data": "simulated clean histories (not RBIH); seed 42",
+  "threshold": 0.1,
+  "chosen_minimum": 5,
+  "results": [
+    {
+      "transactions": 0,
+      "samples": 1,
+      "median_score": 0.747,
+      "share_flagged": 1.0
+    },
+    {
+      "transactions": 1,
+      "samples": 200,
+      "median_score": 0.293,
+      "share_flagged": 1.0
+    },
+    {
+      "transactions": 2,
+      "samples": 200,
+      "median_score": 0.108,
+      "share_flagged": 0.53
+    },
+    {
+      "transactions": 3,
+      "samples": 200,
+      "median_score": 0.069,
+      "share_flagged": 0.31
+    },
+    {
+      "transactions": 5,
+      "samples": 200,
+      "median_score": 0.032,
+      "share_flagged": 0.04
+    },
+    {
+      "transactions": 8,
+      "samples": 200,
+      "median_score": 0.027,
+      "share_flagged": 0.06
+    },
+    {
+      "transactions": 10,
+      "samples": 200,
+      "median_score": 0.02,
+      "share_flagged": 0.035
+    },
+    {
+      "transactions": 15,
+      "samples": 200,
+      "median_score": 0.02,
+      "share_flagged": 0.01
+    }
+  ]
+}

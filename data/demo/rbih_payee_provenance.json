@@ -1,0 +1,176 @@
+{
+  "generated_at": "2026-11-23T21:06:09+00:00",
+  "selection": "random among candidates matching label and score band, seed 42",
+  "pseudonymisation": "counterparty IDs remapped 1:1 per account; timestamps shifted so the last transaction is 2026-11-20; amounts, channels, txn types, MCC kept",
+  "score_caveat": "scores from the provided mule model; see reports/rbih_mule_eval.json caveat",
+  "payees": {
+    "mule_high_a": {
+      "source": "RBIH-NFPC Phase 2",
+      "source_account_id": "ACCT_017038",
+      "rbih_label_is_mule": 1,
+      "rbih_alert_reason": "Salary Cycle Anomaly",
+      "mule_probability": 0.5733,
+      "band": "high",
+      "transactions": 2875,
+      "role_requirement": "labelled mule, high band",
+      "features": {
+        "total_transactions": 2875.0,
+        "total_debit": 134681151.45000002,
+        "total_credit": 161512427.29,
+        "avg_transaction_amount": 103023.8534747826,
+        "unique_counterparties": 57.0,
+        "upi_transaction_count": 2042.0,
+        "incoming_counterparties": 35.0,
+        "outgoing_counterparties": 40.0,
+        "reversal_count": 13.0
+      }
+    },
+    "mule_high_b": {
+      "source": "RBIH-NFPC Phase 2",
+      "source_account_id": "ACCT_165967",
+      "rbih_label_is_mule": 1,
+      "rbih_alert_reason": "MCC-Amount Distribution Anomaly",
+      "mule_probability": 0.5333,
+      "band": "high",
+      "transactions": 3759,
+      "role_requirement": "labelled mule, high band",
+      "features": {
+        "total_transactions": 3759.0,
+        "total_debit": 164456170.07,
+        "total_credit": 156523432.67000002,
+        "avg_transaction_amount": 85389.6256291567,
+        "unique_counterparties": 49.0,
+        "upi_transaction_count": 2742.0,
+        "incoming_counterparties": 34.0,
+        "outgoing_counterparties": 30.0,
+        "reversal_count": 13.0
+      }
+    },
+    "mule_elevated": {
+      "source": "RBIH-NFPC Phase 2",
+      "source_account_id": "ACCT_141995",
+      "rbih_label_is_mule": 1,
+      "rbih_alert_reason": "Routine Investigation",
+      "mule_probability": 0.16,
+      "band": "elevated",
+      "transactions": 992,
+      "role_requirement": "labelled mule, elevated band",
+      "features": {
+        "total_transactions": 992.0,
+        "total_debit": 17195572.03,
+        "total_credit": 9834197.44,
+        "avg_transaction_amount": 27247.75148185484,
+        "unique_counterparties": 57.0,
+        "upi_transaction_count": 695.0,
+        "incoming_counterparties": 43.0,
+        "outgoing_counterparties": 43.0,
+        "reversal_count": 4.0
+      }
+    },
+    "clean_p2p_family": {
+      "source": "RBIH-NFPC Phase 2",
+      "source_account_id": "ACCT_102789",
+      "rbih_label_is_mule": 0,
+      "rbih_alert_reason": null,
+      "mule_probability": 0.0,
+      "band": "low",
+      "transactions": 3597,
+      "role_requirement": "legitimate, very low score",
+      "features": {
+        "total_transactions": 3597.0,
+        "total_debit": 39016336.86,
+        "total_credit": 38490094.42,
+        "avg_transaction_amount": 21547.520511537394,
+        "unique_counterparties": 19.0,
+        "upi_transaction_count": 2664.0,
+        "incoming_counterparties": 18.0,
+        "outgoing_counterparties": 19.0,
+        "reversal_count": 28.0
+      }
+    },
+    "clean_p2p_rent": {
+      "source": "RBIH-NFPC Phase 2",
+      "source_account_id": "ACCT_102719",
+      "rbih_label_is_mule": 0,
+      "rbih_alert_reason": null,
+      "mule_probability": 0.0,
+      "band": "low",
+      "transactions": 5497,
+      "role_requirement": "legitimate, very low score",
+      "features": {
+        "total_transactions": 5497.0,
+        "total_debit": 81097755.77000001,
+        "total_credit": 97489547.88,
+        "avg_transaction_amount": 32488.139648899396,
+        "unique_counterparties": 7.0,
+        "upi_transaction_count": 4048.0,
+        "incoming_counterparties": 7.0,
+        "outgoing_counterparties": 6.0,
+        "reversal_count": 26.0
+      }
+    },
+    "clean_p2p_misc": {
+      "source": "RBIH-NFPC Phase 2",
+      "source_account_id": "ACCT_165903",
+      "rbih_label_is_mule": 0,
+      "rbih_alert_reason": null,
+      "mule_probability": 0.0,
+      "band": "low",
+      "transactions": 1328,
+      "role_requirement": "legitimate, very low score",
+      "features": {
+        "total_transactions": 1328.0,
+        "total_debit": 14483521.209999999,
+        "total_credit": 10593621.07,
+        "avg_transaction_amount": 18883.39027108434,
+        "unique_counterparties": 4.0,
+        "upi_transaction_count": 935.0,
+        "incoming_counterparties": 3.0,
+        "outgoing_counterparties": 4.0,
+        "reversal_count": 4.0
+      }
+    },
+    "clean_merchant_a": {
+      "source": "RBIH-NFPC Phase 2",
+      "source_account_id": "ACCT_017294",
+      "rbih_label_is_mule": 0,
+      "rbih_alert_reason": null,
+      "mule_probability": 0.0067,
+      "band": "low",
+      "transactions": 1449,
+      "role_requirement": "legitimate, very low score (shown as a merchant in the demo)",
+      "features": {
+        "total_transactions": 1449.0,
+        "total_debit": 23676268.59,
+        "total_credit": 20268897.949999996,
+        "avg_transaction_amount": 30327.92721877156,
+        "unique_counterparties": 25.0,
+        "upi_transaction_count": 1031.0,
+        "incoming_counterparties": 25.0,
+        "outgoing_counterparties": 24.0,
+        "reversal_count": 3.0
+      }
+    },
+    "clean_merchant_b": {
+      "source": "RBIH-NFPC Phase 2",
+      "source_account_id": "ACCT_145276",
+      "rbih_label_is_mule": 0,
+      "rbih_alert_reason": null,
+      "mule_probability": 0.0,
+      "band": "low",
+      "transactions": 2989,
+      "role_requirement": "legitimate, very low score (shown as a merchant in the demo)",
+      "features": {
+        "total_transactions": 2989.0,
+        "total_debit": 27747632.36,
+        "total_credit": 35014226.940000005,
+        "avg_transaction_amount": 20997.611007025764,
+        "unique_counterparties": 7.0,
+        "upi_transaction_count": 2184.0,
+        "incoming_counterparties": 6.0,
+        "outgoing_counterparties": 7.0,
+        "reversal_count": 15.0
+      }
+    }
+  }
+}

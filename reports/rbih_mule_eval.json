@@ -1,0 +1,158 @@
+{
+  "generated_at": "2026-11-23T21:05:22+00:00",
+  "dataset": "RBIH-NFPC Phase 2 (train_labels.parquet + transactions/)",
+  "caveat": "may be optimistic (possible overlap with training data)",
+  "caveat_detail": "The mule model was trained on this dataset and its train/test split is unknown; these labelled accounts may have been seen in training. Labels may also contain noise/red-herrings (RBIH README).",
+  "feature_definitions": "safepay/mule/features.py (reconstructed; original code not provided)",
+  "sample": {
+    "method": "20 random contiguous parts (seed 42) + scattered part(s) for complete histories; boundary accounts dropped; labelled accounts only",
+    "parts": [
+      "transactions\\batch-1\\part_0033.parquet",
+      "transactions\\batch-1\\part_0034.parquet",
+      "transactions\\batch-1\\part_0037.parquet",
+      "transactions\\batch-1\\part_0051.parquet",
+      "transactions\\batch-1\\part_0078.parquet",
+      "transactions\\batch-2\\part_0165.parquet",
+      "transactions\\batch-2\\part_0167.parquet",
+      "transactions\\batch-2\\part_0178.parquet",
+      "transactions\\batch-3\\part_0202.parquet",
+      "transactions\\batch-3\\part_0204.parquet",
+      "transactions\\batch-3\\part_0248.parquet",
+      "transactions\\batch-3\\part_0268.parquet",
+      "transactions\\batch-3\\part_0280.parquet",
+      "transactions\\batch-3\\part_0286.parquet",
+      "transactions\\batch-3\\part_0292.parquet",
+      "transactions\\batch-3\\part_0297.parquet",
+      "transactions\\batch-4\\part_0308.parquet",
+      "transactions\\batch-4\\part_0328.parquet",
+      "transactions\\batch-4\\part_0331.parquet",
+      "transactions\\batch-4\\part_0378.parquet",
+      "transactions\\batch-4\\part_0396.parquet"
+    ],
+    "transactions": 11904231,
+    "accounts": 4751,
+    "mules": 151,
+    "legitimate": 4600,
+    "mule_rate_sample": 0.0318,
+    "mule_rate_all_labels": 0.0279
+  },
+  "threshold": 0.1,
+  "metrics_at_threshold": {
+    "tp": 80,
+    "fp": 71,
+    "tn": 4529,
+    "fn": 71,
+    "precision": 0.5298,
+    "recall": 0.5298,
+    "f1": 0.5298,
+    "false_positive_rate": 0.0154
+  },
+  "roc_auc": 0.9088,
+  "pr_auc": 0.5527,
+  "band_share": {
+    "low": 0.9682,
+    "elevated": 0.0267,
+    "high": 0.0051
+  },
+  "band_share_mules": {
+    "low": 0.4702,
+    "elevated": 0.3775,
+    "high": 0.1523
+  },
+  "score_quantiles": {
+    "mules": {
+      "0.1": 0.007,
+      "0.5": 0.107,
+      "0.9": 0.527
+    },
+    "legitimate": {
+      "0.5": 0.0,
+      "0.9": 0.02,
+      "0.99": 0.12
+    }
+  },
+  "recall_by_alert_reason": [
+    {
+      "alert_reason": "Routine Investigation",
+      "recall": 0.5,
+      "n": 30
+    },
+    {
+      "alert_reason": "Geographic Anomaly Detected",
+      "recall": 0.611,
+      "n": 18
+    },
+    {
+      "alert_reason": "MCC-Amount Distribution Anomaly",
+      "recall": 0.692,
+      "n": 13
+    },
+    {
+      "alert_reason": "Rapid Movement of Funds",
+      "recall": 0.385,
+      "n": 13
+    },
+    {
+      "alert_reason": "High-Value Activity on New Account",
+      "recall": 0.5,
+      "n": 12
+    },
+    {
+      "alert_reason": "Structuring Transactions Below Threshold",
+      "recall": 0.3,
+      "n": 10
+    },
+    {
+      "alert_reason": "Dormant Account Reactivation",
+      "recall": 0.556,
+      "n": 9
+    },
+    {
+      "alert_reason": "Round Amount Pattern",
+      "recall": 0.714,
+      "n": 7
+    },
+    {
+      "alert_reason": "Unusual Fund Flow Pattern",
+      "recall": 0.333,
+      "n": 6
+    },
+    {
+      "alert_reason": "Branch Cluster Investigation",
+      "recall": 0.6,
+      "n": 5
+    },
+    {
+      "alert_reason": "Salary Cycle Anomaly",
+      "recall": 0.8,
+      "n": 5
+    },
+    {
+      "alert_reason": "Layered Transaction Pattern",
+      "recall": 0.4,
+      "n": 5
+    },
+    {
+      "alert_reason": "Income-Transaction Mismatch",
+      "recall": 0.75,
+      "n": 4
+    },
+    {
+      "alert_reason": "Post-Contact-Update Spike",
+      "recall": 0.667,
+      "n": 3
+    }
+  ],
+  "feature_medians": {
+    "total_transactions": 1955.0,
+    "total_debit": 27509037.1,
+    "total_credit": 23483281.4,
+    "avg_transaction_amount": 25451.0,
+    "unique_counterparties": 18.0,
+    "upi_transaction_count": 1418.0,
+    "incoming_counterparties": 18.0,
+    "outgoing_counterparties": 17.0,
+    "reversal_count": 10.0
+  },
+  "runtime_sec": 42.3
+}

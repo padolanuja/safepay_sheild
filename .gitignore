@@ -1,0 +1,11 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+# runtime database (rebuilt by `python -m safepay.seed`)
+data/safepay.db
+data/*.db
+# unzipped dataset (rebuilt from safepay_coercion_dataset.zip)
+data/coercion/
+# Original drop-in copy; the tracked, byte-identical copy is models/safepay_mule_model.pkl
+/safepay_mule_model.pkl
