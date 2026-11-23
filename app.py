@@ -14,6 +14,7 @@ from werkzeug.exceptions import HTTPException
 import config
 from safepay.api import register_blueprints
 from safepay.mule.loader import MuleModelError, load_mule_model
+from safepay.mule.predictor import MulePredictor
 
 
 def create_app(db_path=None) -> Flask:
@@ -28,6 +29,7 @@ def create_app(db_path=None) -> Flask:
     except MuleModelError as e:
         app.config["MULE_MODEL"] = None
         app.config["MULE_MODEL_ERROR"] = str(e)
+    app.config["MULE_PREDICTOR"] = MulePredictor(app.config["MULE_MODEL"], app.config["MULE_MODEL_ERROR"])
     app.config["COERCION_MODEL"] = None   # trained in Phase 5 (scripts/train_coercion_model.py)
 
     register_blueprints(app)

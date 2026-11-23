@@ -18,8 +18,8 @@ def _close_db(_exc=None):
 
 
 def register_blueprints(app: Flask) -> None:
-    from safepay.api import health, payees, users
+    from safepay.api import health, mule, payees, users
 
     app.teardown_appcontext(_close_db)
-    for bp in (health.bp, users.bp, payees.bp):
+    for bp in (health.bp, users.bp, payees.bp, mule.bp):
         app.register_blueprint(bp, url_prefix="/api")
