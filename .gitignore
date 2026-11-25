@@ -11,3 +11,6 @@ data/coercion/
 /safepay_mule_model.pkl
 # local Claude Code preview config
 .claude/
+
+# broken venv copied from another machine
+.venv_broken_from_other_pc/

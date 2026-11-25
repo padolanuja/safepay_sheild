@@ -7,7 +7,7 @@ from safepay.i18n import strings
 bp = Blueprint("ui", __name__)        # registered without the /api prefix
 api_bp = Blueprint("i18n", __name__)  # registered under /api
 
-PAGES = {"pay": "pay.html", "dashboard": "dashboard.html", "evaluation": "evaluation.html", "settings": "settings.html"}
+PAGES = {"pay": "pay.html", "dashboard": "dashboard.html", "evaluation": "evaluation.html", "settings": "settings.html", "lab": "lab.html"}
 
 
 @bp.get("/")

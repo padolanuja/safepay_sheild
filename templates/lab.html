@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}Blind Test Lab{% endblock %}
+{% block heading %}Blind Test Lab{% endblock %}
+{% block content %}
+<div class="lab-hero">
+  <section class="hero-card">
+    <div class="eyebrow"><svg class="ico"><use href="#i-eye-off"/></svg>No presets. No cherry-picking.</div>
+    <h2>Score payments nobody on the team chose</h2>
+    <p>Every case here is drawn at random from the held-out test split: rows the models never saw during training.
+      The ground truth stays sealed until the engine has decided. Mistakes are shown as plainly as hits.</p>
+    <ul class="proof">
+      <li><svg class="ico"><use href="#i-database"/></svg><span><b id="hPool">6,000</b> held-out rows (30% stratified split, seed 42)</span></li>
+      <li><svg class="ico"><use href="#i-check-circle"/></svg><span>Overlap with training rows checked on every draw: <b id="hLeak">0</b></span></li>
+      <li><svg class="ico"><use href="#i-dice"/></svg><span>New random seed per draw; any seed can be replayed</span></li>
+      <li><svg class="ico"><use href="#i-cpu"/></svg><span>Same models, rules and fusion matrix as the live <code>/api/assess</code></span></li>
+    </ul>
+  </section>
+  <section class="pool-card">
+    <div class="tile t-key"><div class="t-label"><svg class="ico"><use href="#i-layers"/></svg>Rows in test pool</div><div class="t-value" id="tPool">—</div><div class="t-sub">of <span id="tAll">—</span> synthetic payments</div></div>
+    <div class="tile t-ALLOW"><div class="t-label"><svg class="ico"><use href="#i-shield"/></svg>Training rows in last draw</div><div class="t-value" id="tLeak">—</div><div class="t-sub">must always be 0</div></div>
+    <div class="tile"><div class="t-label"><svg class="ico"><use href="#i-target"/></svg>Your calls vs engine</div><div class="t-value" id="tScore">0 : 0</div><div class="t-sub">correct calls, this session</div></div>
+    <div class="tile"><div class="t-label"><svg class="ico"><use href="#i-timer"/></svg>Last draw</div><div class="t-value" id="tTime">—</div><div class="t-sub" id="tSeed">seed —</div></div>
+  </section>
+</div>
+
+<div class="lab-grid">
+  <!-- Single blind case -->
+  <section class="panel" id="single">
+    <div class="panel-head">
+      <div class="ph-title"><span class="ph-ico"><svg class="ico"><use href="#i-dice"/></svg></span>
+        <div><h2>One blind case</h2><p class="muted small">Draw a payment, make your own call, then compare with the engine and the truth.</p></div></div>
+    </div>
+    <div class="run-row">
+      <button class="btn btn-primary" id="drawOne"><svg class="ico"><use href="#i-dice"/></svg>Draw a random case</button>
+      <label class="switch"><input type="checkbox" id="balanced" checked><span>50 / 50 coerced vs genuine</span></label>
+    </div>
+    <div id="caseBox"><p class="empty">No case drawn yet.</p></div>
+  </section>
+
+  <!-- Stress test -->
+  <section class="panel" id="stress">
+    <div class="panel-head">
+      <div class="ph-title"><span class="ph-ico"><svg class="ico"><use href="#i-activity"/></svg></span>
+        <div><h2>Stress test</h2><p class="muted small">Score N random held-out payments now and compute the metrics live.</p></div></div>
+    </div>
+    <div class="run-row">
+      <select id="nRows" aria-label="Number of cases"><option>100</option><option selected>250</option><option>500</option><option>1000</option></select>
+      <input id="seedIn" placeholder="random seed" inputmode="numeric" aria-label="Seed (blank = random)">
+      <button class="btn btn-primary" id="runBatch"><svg class="ico"><use href="#i-play"/></svg>Run</button>
+    </div>
+    <div id="batchBox"><p class="empty">Run a stress test to see live metrics.</p></div>
+    <h3 class="why-h">Draw history</h3>
+    <p class="muted small" style="margin-top:-4px">Each draw gives different numbers that stay in a band. A scripted demo would repeat itself exactly.</p>
+    <svg class="spark" id="spark" viewBox="0 0 400 70" preserveAspectRatio="none"></svg>
+    <div class="table-wrap"><table class="runs" id="runs"><thead><tr><th>Seed</th><th class="num">n</th><th class="num">Recall</th><th class="num">Precision</th><th class="num">FP rate</th><th class="num">Time</th></tr></thead><tbody></tbody></table></div>
+  </section>
+</div>
+
+<section class="panel" style="margin-top:18px">
+  <h2 class="section"><svg class="ico"><use href="#i-layers"/></svg>Cases in the last stress test <span class="muted small" id="rowsNote"></span></h2>
+  <div class="table-wrap"><table id="rowsTable"><tbody><tr><td class="empty">—</td></tr></tbody></table></div>
+  <p class="caveat">Synthetic coercion data: shows the design works, not real-world accuracy. Payee profiles are real RBIH accounts (pseudonymised).
+    For speed, the SHAP value used by the payee/amount gate is cached per row (<code>scripts/build_lab_cache.py</code>); probabilities, rules and decisions are computed on every draw.</p>
+</section>
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='js/lab.js') }}"></script>{% endblock %}

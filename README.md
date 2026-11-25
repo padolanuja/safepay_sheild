@@ -16,8 +16,16 @@ python -m venv .venv
 .\.venv\Scripts\python scripts\build_demo_payees.py       # needs the output of the line above
 .\.venv\Scripts\python -m safepay.seed
 .\.venv\Scripts\python -m pytest -q
-.\.venv\Scripts\flask --app app run
+.\.venv\Scripts\python run_dev.py                         # then open http://localhost:5000
 ```
+
+`requirements.txt` now includes **xgboost**. The saved coercion models are XGBoost, and without
+it the app starts with the coercion model unavailable. `data/lab/shap_share_cache.csv` is
+kept in the project so the Blind Test Lab is fast on a fresh clone. Rebuild it with
+`.\.venv\Scripts\python scripts\build_lab_cache.py` (about 10 minutes) if the models change.
+
+> **Presenting to judges?** Read [docs/DEMO_AND_JUDGE_QA.md](docs/DEMO_AND_JUDGE_QA.md): a
+> 5-minute demo script and honest answers to "isn't this just preset values?".
 
 The two RBIH scripts only need to run once. Their outputs are kept in the project
 (`reports/rbih_mule_eval*.{json,csv}`, `data/demo/`), so seeding and running the app
@@ -90,8 +98,19 @@ deliberately left unchanged here.
 
 ## Frontend and languages
 
-Run `.\.venv\Scripts\flask --app app run`, then open <http://localhost:5000>. There are four screens:
-- **Pay**: the simulated UPI app, the Situation Simulator with the 13 presets, and the "Why?" panel.
+Run `.\.venv\Scripts\python run_dev.py`, then open <http://localhost:5000>. There are five screens:
+- **Pay (Payment console)**: the simulated UPI app, the **Signal console** and the **Risk analysis** panel.
+  - *Live capture* (the default) measures behaviour from the real interaction: time on screen,
+    pauses while typing, amount typed in bursts, UPI ID pasted, leaving the tab, and the device clock.
+  - *Device events* a browser can't read (call, screen share, app installs) are emulated and
+    labelled as such. An incoming-call overlay with a real-time call clock drives the call signals.
+  - *Manual override* and the 13 *guided scenarios* set values by hand. A scenario's expected
+    outcome stays hidden until the engine decides.
+  - Risk analysis tabs: **Explanation**, **What-if** (re-runs the pipeline with one signal removed)
+    and **Inputs & sources** (every value, its source, and the Android API that would supply it).
+- **Blind Test Lab**: random cases from the 30% held-out test split, scored live. Either one blind
+  case (your call, then the engine's decision, then the sealed truth) or a 100–1,000 case stress
+  test with a live confusion matrix.
 - **Dashboard**: history, decisions over time, the most common warning signs and the feedback queue.
 - **Evaluation**: reads `reports/`.
 - **Settings**: trusted contacts with consent, trusted payees, planned payments and language.

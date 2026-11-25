@@ -42,6 +42,20 @@
     pct(x, d = 0) { return (x === null || x === undefined) ? "—" : (100 * x).toFixed(d) + "%"; },
     esc(s) { return String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])); },
 
+    icon(name, cls = "") { return `<svg class="ico ${cls}" aria-hidden="true"><use href="#i-${name}"/></svg>`; },
+
+    async engineStatus() {
+      const ul = document.getElementById("engineList");
+      if (!ul) return;
+      try {
+        const h = await this.api("GET", "/api/health");
+        const row = (ok, name, sub) => `<li><i class="led ${ok ? "on" : "off"}"></i><span>${name}</span><small>${sub}</small></li>`;
+        ul.innerHTML = row(h.models.coercion.loaded, "Coercion model", h.models.coercion.loaded ? "2 stages" : "offline")
+          + row(h.models.mule.loaded, "Mule model", h.models.mule.loaded ? "RF · RBIH" : "offline")
+          + row(h.database, "Rules + fusion", h.database ? "R1–R7" : "no DB");
+      } catch (e) { ul.innerHTML = `<li><i class="led off"></i><span>Engine unreachable</span></li>`; }
+    },
+
     toast(msg, kind = "") {
       const el = document.getElementById("toast");
       el.textContent = msg; el.className = "toast show " + kind;
@@ -87,12 +101,45 @@
       document.querySelectorAll(".lang-toggle button").forEach(b => b.addEventListener("click", () => this.setLang(b.dataset.lang)));
       document.querySelectorAll("[data-nav]").forEach(a => a.classList.toggle("active", a.dataset.nav === document.body.dataset.page));
 
+      const tt = document.getElementById("themeToggle");
+      if (tt) tt.addEventListener("click", () => {
+        const next = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+        document.documentElement.dataset.theme = next; store.set("sp.theme", next);
+      });
+      this.engineStatus();
+
       const saved = Number(store.get("sp.user"));
       const first = this.users.some(u => u.id === saved) ? saved : this.users[0].id;
       this.userId = first; picker.value = String(first);
       await this.setLang(store.get("sp.lang") || this.user().language, false);
     },
   };
+
+  // Shared chart tooltip: any element (HTML or SVG) with data-tip="<html>" shows it on hover/focus.
+  // data-tip content is built by our own chart code from escaped values.
+  (function chartTooltip() {
+    let tip = null;
+    const show = (el, x, y) => {
+      if (!tip) { tip = document.createElement("div"); tip.className = "chart-tip"; tip.setAttribute("role", "tooltip"); document.body.appendChild(tip); }
+      tip.innerHTML = el.getAttribute("data-tip"); tip.hidden = false;
+      const r = tip.getBoundingClientRect(), pad = 14;
+      let left = x + pad, top = y + pad;
+      if (left + r.width > window.innerWidth - 8) left = x - r.width - pad;
+      if (top + r.height > window.innerHeight - 8) top = y - r.height - pad;
+      tip.style.left = left + "px"; tip.style.top = top + "px";
+    };
+    const hide = () => { if (tip) tip.hidden = true; };
+    document.addEventListener("mousemove", e => {
+      const el = e.target.closest && e.target.closest("[data-tip]");
+      el ? show(el, e.clientX, e.clientY) : hide();
+    });
+    document.addEventListener("focusin", e => {
+      const el = e.target.closest && e.target.closest("[data-tip]");
+      if (el) { const r = el.getBoundingClientRect(); show(el, r.right, r.top); }
+    });
+    document.addEventListener("focusout", hide);
+    window.addEventListener("scroll", hide, true);
+  })();
 
   SP.ready = SP.init().catch(e => { console.error(e); SP.toast("Could not reach the SafePay Shield server: " + e.message, "error"); });
 })();

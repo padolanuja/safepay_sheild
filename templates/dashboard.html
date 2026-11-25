@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% block title %}Dashboard{% endblock %}
+{% block heading %}Risk dashboard{% endblock %}
 {% block content %}
 <div class="page-head">
   <div><h1 data-i18n="dash.title">Dashboard</h1>
@@ -13,15 +14,16 @@
 </div>
 <div class="tiles" id="tiles"></div>
 <div class="grid-2">
-  <section class="panel"><h2 class="section" data-i18n="dash.over_time">Decisions over time</h2><div id="overTime"></div></section>
-  <section class="panel"><h2 class="section" data-i18n="dash.top_indicators">Most common warning signs</h2><div id="topInd"></div></section>
+  <section class="panel"><h2 class="section"><svg class="ico"><use href="#i-chart"/></svg><span data-i18n="dash.mix">Decision mix</span></h2><div id="mix"></div>
+    <h3 class="why-h" data-i18n="dash.score_timeline">Risk score per check</h3><div id="overTime"></div></section>
+  <section class="panel"><h2 class="section"><svg class="ico"><use href="#i-alert"/></svg><span data-i18n="dash.top_indicators">Most common warning signs</span></h2><div id="topInd"></div></section>
 </div>
 <section class="panel" style="margin-bottom:18px">
-  <h2 class="section" data-i18n="dash.history">Transaction history</h2>
+  <h2 class="section"><svg class="ico"><use href="#i-layers"/></svg><span data-i18n="dash.history">Transaction history</span></h2>
   <div class="table-wrap"><table id="histTable"></table></div>
 </section>
 <section class="panel">
-  <h2 class="section" data-i18n="dash.feedback">Feedback queue</h2>
+  <h2 class="section"><svg class="ico"><use href="#i-message"/></svg><span data-i18n="dash.feedback">Feedback queue</span></h2>
   <p class="caveat" data-i18n="dash.feedback_note">Stored for human review only. Models are never retrained from feedback.</p>
   <div class="table-wrap"><table id="fbTable"></table></div>
 </section>

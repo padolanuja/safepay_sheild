@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% block title %}Settings{% endblock %}
+{% block heading %}Settings{% endblock %}
 {% block content %}
 <div class="page-head">
   <div><h1 data-i18n="settings.title">Settings</h1>
@@ -7,7 +8,7 @@
 </div>
 <div class="grid-2">
   <section class="panel">
-    <h2 class="section" data-i18n="settings.contacts">Trusted contacts</h2>
+    <h2 class="section"><svg class="ico"><use href="#i-users"/></svg><span data-i18n="settings.contacts">Trusted contacts</span></h2>
     <p class="caveat">Alerts are simulated, sent only on a HOLD, and only to contacts who gave consent. They share an amount range only.</p>
     <div class="table-wrap"><table id="contacts"></table></div>
     <form id="addContact" class="form-row">
@@ -19,7 +20,7 @@
     </form>
   </section>
   <section class="panel">
-    <h2 class="section" data-i18n="settings.language">Language</h2>
+    <h2 class="section"><svg class="ico"><use href="#i-globe"/></svg><span data-i18n="settings.language">Language</span></h2>
     <p class="muted small">Saved as the payer's preference. Hindi and Marathi text should be reviewed by a native speaker.</p>
     <div class="segmented" id="langSeg">
       <button type="button" data-lang="en">English</button><button type="button" data-lang="hi">हिंदी</button><button type="button" data-lang="mr">मराठी</button>
@@ -28,7 +29,7 @@
 </div>
 <div class="grid-2">
   <section class="panel">
-    <h2 class="section" data-i18n="settings.beneficiaries">Trusted payees</h2>
+    <h2 class="section"><svg class="ico"><use href="#i-shield"/></svg><span data-i18n="settings.beneficiaries">Trusted payees</span></h2>
     <p class="caveat">Lowers a decision by one level — never when a serious warning sign is present.</p>
     <div class="table-wrap"><table id="benef"></table></div>
     <form id="addBenef" class="form-row">
@@ -38,7 +39,7 @@
     </form>
   </section>
   <section class="panel">
-    <h2 class="section" data-i18n="settings.planned">Planned payments</h2>
+    <h2 class="section"><svg class="ico"><use href="#i-clock"/></svg><span data-i18n="settings.planned">Planned payments</span></h2>
     <p class="caveat">A matching payment (same payee, amount within 5%, within 3 days of the planned day) lowers friction — never past a serious warning sign.</p>
     <div class="table-wrap"><table id="planned"></table></div>
     <form id="addPlanned" class="form-row">

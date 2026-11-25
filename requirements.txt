@@ -10,5 +10,5 @@ flask>=3.0
 shap>=0.46           # explanations; a documented fallback is used if it is missing
 matplotlib>=3.8      # report charts
 pytest>=8
-# Optional: xgboost is tried by scripts/train_coercion_model.py and skipped if absent.
-# xgboost>=2.0
+# REQUIRED: the saved coercion models (models/coercion_model_*.pkl) are XGBoost; without it they fail to load.
+xgboost>=2.0

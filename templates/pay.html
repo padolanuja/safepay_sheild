@@ -1,79 +1,139 @@
 {% extends "base.html" %}
-{% block title %}Pay{% endblock %}
+{% block title %}Payment console{% endblock %}
+{% block heading %}Payment console{% endblock %}
 {% block content %}
 <div class="pay-layout">
 
-  <!-- ============ Situation simulator ============ -->
-  <aside class="panel sim" aria-labelledby="simTitle">
+  <!-- ============ Signal console ============ -->
+  <aside class="panel sim console" aria-labelledby="simTitle">
     <div class="panel-head">
-      <h2 id="simTitle" data-i18n="sim.title">Situation simulator</h2>
-      <p class="muted small" data-i18n="sim.sub">Simulated phone signals (demo only)</p>
+      <div class="ph-title"><span class="ph-ico"><svg class="ico"><use href="#i-radio"/></svg></span>
+        <div><h2 id="simTitle">Signal console</h2><p class="muted small">What the phone reports to the risk engine</p></div></div>
     </div>
 
-    <label class="field">
-      <span data-i18n="sim.preset">Preset scenario</span>
-      <select id="preset"></select>
-    </label>
-    <div id="presetInfo" class="preset-info" hidden></div>
+    <div class="segmented mode-switch" id="captureMode" role="radiogroup" aria-label="Signal source">
+      <button type="button" data-val="live"><svg class="ico"><use href="#i-radio"/></svg>Live capture</button>
+      <button type="button" data-val="manual"><svg class="ico"><use href="#i-sliders"/></svg>Manual override</button>
+    </div>
+    <p class="mode-note" id="modeNote"></p>
 
-    <div class="sim-group">
-      <span class="group-label" data-i18n="sim.call">Phone call</span>
-      <div class="segmented" id="callType" role="radiogroup">
-        <button type="button" data-val="none" data-i18n="sim.call_none">No call</button>
-        <button type="button" data-val="voice" data-i18n="sim.call_voice">Voice call</button>
-        <button type="button" data-val="video" data-i18n="sim.call_video">Video call</button>
+    <!-- Behaviour: measured from the real interaction in live mode -->
+    <section class="console-sec">
+      <h3><svg class="ico"><use href="#i-keyboard"/></svg>Behaviour <span class="src-pill" id="behaviourPill">Measured</span></h3>
+      <div class="tele-grid" id="tele">
+        <div class="tele" data-k="session"><span class="tele-l"><svg class="ico"><use href="#i-timer"/></svg>Time on screen</span><b id="tSession">0 s</b></div>
+        <div class="tele" data-k="hes"><span class="tele-l"><svg class="ico"><use href="#i-clock"/></svg>Hesitation pauses</span><b id="tHes">0</b></div>
+        <div class="tele" data-k="seg"><span class="tele-l"><svg class="ico"><use href="#i-keyboard"/></svg>Stop-start typing</span><b id="tSeg">No</b></div>
+        <div class="tele" data-k="paste"><span class="tele-l"><svg class="ico"><use href="#i-clipboard"/></svg>UPI ID pasted</span><b id="tPaste">No</b></div>
+        <div class="tele" data-k="switch"><span class="tele-l"><svg class="ico"><use href="#i-switch"/></svg>App switches</span><b id="tSwitch">0</b></div>
+        <div class="tele" data-k="hour"><span class="tele-l"><svg class="ico"><use href="#i-moon"/></svg>Local time</span><b id="tHour">--:--</b></div>
       </div>
-      <div id="callDetails" class="call-details">
-        <label class="range"><span><span data-i18n="sim.call_minutes">Call length (minutes)</span> <output id="callMinOut">0</output></span>
-          <input type="range" id="call_duration_min" min="0" max="180" step="1" value="0"></label>
-        <label class="switch"><input type="checkbox" id="caller_in_contacts"><span data-i18n="sim.caller_known">Caller is a saved contact</span></label>
-        <label class="switch"><input type="checkbox" id="caller_is_international"><span data-i18n="sim.international">International number</span></label>
+      <button type="button" class="btn btn-outline btn-sm live-only" id="simSwitch"><svg class="ico"><use href="#i-switch"/></svg>Simulate leaving the app</button>
+
+      <div class="manual-only">
+        <label class="switch"><input type="checkbox" id="vpa_pasted"><span data-i18n="sim.vpa_pasted">UPI ID pasted</span></label>
+        <label class="switch"><input type="checkbox" id="segmented_typing"><span data-i18n="sim.segmented">Stop-start typing</span></label>
+        <label class="range"><span><span data-i18n="sim.hesitation">Hesitation level</span> <output id="hesOut">0</output></span>
+          <input type="range" id="hesitation_events" min="0" max="10" value="0"></label>
+        <label class="range"><span><span data-i18n="sim.app_switches">App switches</span> <output id="appOut">0</output></span>
+          <input type="range" id="app_switches" min="0" max="10" value="0"></label>
+        <label class="range"><span><span data-i18n="sim.session">Time on payment screen (seconds)</span> <output id="sessOut">45</output></span>
+          <input type="range" id="session_duration_sec" min="5" max="600" step="5" value="45"></label>
+        <label class="range"><span><span data-i18n="sim.hour">Time of day</span> <output id="hourOut">14:00</output> <em id="nightTag" class="tag tag-night" data-i18n="sim.night" hidden>Night-time</em></span>
+          <input type="range" id="hour_of_day" min="0" max="23" value="14"></label>
       </div>
-    </div>
+    </section>
 
-    <div class="sim-group">
-      <label class="switch danger"><input type="checkbox" id="screen_share_active"><span data-i18n="sim.screen_share">Screen sharing on</span></label>
-      <label class="switch danger"><input type="checkbox" id="remote_access_app_installed_7d"><span data-i18n="sim.remote_app">Remote-access app installed in last 7 days</span></label>
-      <label class="switch"><input type="checkbox" id="vpa_pasted"><span data-i18n="sim.vpa_pasted">UPI ID pasted</span></label>
-      <label class="switch"><input type="checkbox" id="payee_in_contacts"><span data-i18n="sim.payee_in_contacts">Payee saved in contacts</span></label>
-      <label class="switch"><input type="checkbox" id="fd_or_loan_liquidated_7d"><span data-i18n="sim.fd_broken">FD broken / loan taken this week</span></label>
-      <label class="switch"><input type="checkbox" id="segmented_typing"><span data-i18n="sim.segmented">Stop-start typing</span></label>
-    </div>
+    <!-- Device events: emulated (a browser cannot read call / screen / install state) -->
+    <section class="console-sec">
+      <h3><svg class="ico"><use href="#i-smartphone"/></svg>Device events <span class="src-pill emulated">Emulated</span></h3>
+      <p class="sec-note">A browser can't read call, screen-share or app-install state. On Android these come from TelephonyManager, MediaProjection and PackageManager. Here you trigger them.</p>
 
-    <div class="sim-group">
-      <label class="range"><span><span data-i18n="sim.hesitation">Hesitation level</span> <output id="hesOut">0</output></span>
-        <input type="range" id="hesitation_events" min="0" max="10" value="0"></label>
-      <label class="range"><span><span data-i18n="sim.app_switches">App switches</span> <output id="appOut">0</output></span>
-        <input type="range" id="app_switches" min="0" max="10" value="0"></label>
-      <label class="range"><span><span data-i18n="sim.session">Time on payment screen (seconds)</span> <output id="sessOut">45</output></span>
-        <input type="range" id="session_duration_sec" min="5" max="600" step="5" value="45"></label>
-      <label class="range"><span><span data-i18n="sim.hour">Time of day</span> <output id="hourOut">14:00</output> <em id="nightTag" class="tag tag-night" data-i18n="sim.night" hidden>Night-time</em></span>
-        <input type="range" id="hour_of_day" min="0" max="23" value="14"></label>
-      <label class="range" id="newPayeesWrap"><span><span data-i18n="sim.new_payees_24h">Payments to new people in last 24 h</span> <output id="npOut">0</output></span>
-        <input type="range" id="new_payees_24h" min="0" max="8" value="0"></label>
-    </div>
-    <button type="button" class="btn btn-ghost btn-block" id="resetSim" data-i18n="btn.reset">Reset</button>
+      <div class="sim-group">
+        <span class="group-label"><svg class="ico"><use href="#i-phone"/></svg><span data-i18n="sim.call">Phone call</span></span>
+        <div class="ring-row live-only">
+          <select id="ringWho" aria-label="Caller">
+            <option value="unknown">Unknown caller</option>
+            <option value="international">International</option>
+            <option value="contact">Saved contact</option>
+          </select>
+          <select id="ringKind" aria-label="Call type"><option value="voice">Voice</option><option value="video">Video</option></select>
+          <button type="button" class="btn btn-primary btn-sm" id="ringBtn"><svg class="ico"><use href="#i-bell"/></svg>Ring phone</button>
+        </div>
+        <div class="segmented" id="callType" role="radiogroup">
+          <button type="button" data-val="none" data-i18n="sim.call_none">No call</button>
+          <button type="button" data-val="voice" data-i18n="sim.call_voice">Voice call</button>
+          <button type="button" data-val="video" data-i18n="sim.call_video">Video call</button>
+        </div>
+        <div id="callDetails" class="call-details">
+          <div class="call-clock live-only"><span><svg class="ico"><use href="#i-timer"/></svg>Call clock <b id="callClock">00:00</b></span>
+            <span class="speed segmented" id="callSpeed" title="Time compression for the demo">
+              <button type="button" data-val="1">1×</button><button type="button" data-val="10">10×</button><button type="button" data-val="60">60×</button></span></div>
+          <label class="range"><span><span data-i18n="sim.call_minutes">Call length (minutes)</span> <output id="callMinOut">0</output></span>
+            <input type="range" id="call_duration_min" min="0" max="180" step="1" value="0"></label>
+          <label class="switch"><input type="checkbox" id="caller_in_contacts"><span data-i18n="sim.caller_known">Caller is a saved contact</span></label>
+          <label class="switch"><input type="checkbox" id="caller_is_international"><span data-i18n="sim.international">International number</span></label>
+        </div>
+      </div>
+
+      <div class="sim-group">
+        <label class="switch danger"><input type="checkbox" id="screen_share_active"><span><svg class="ico"><use href="#i-monitor"/></svg><span data-i18n="sim.screen_share">Screen sharing on</span></span></label>
+        <label class="switch danger"><input type="checkbox" id="remote_access_app_installed_7d"><span><svg class="ico"><use href="#i-download"/></svg><span data-i18n="sim.remote_app">Remote-access app installed in last 7 days</span></span></label>
+        <label class="switch"><input type="checkbox" id="payee_in_contacts"><span><svg class="ico"><use href="#i-contact"/></svg><span data-i18n="sim.payee_in_contacts">Payee saved in contacts</span></span></label>
+        <label class="switch"><input type="checkbox" id="fd_or_loan_liquidated_7d"><span><svg class="ico"><use href="#i-bank"/></svg><span data-i18n="sim.fd_broken">FD broken / loan taken this week</span></span></label>
+        <label class="range" id="newPayeesWrap"><span><span data-i18n="sim.new_payees_24h">Payments to new people in last 24 h</span> <output id="npOut">0</output></span>
+          <input type="range" id="new_payees_24h" min="0" max="8" value="0"></label>
+      </div>
+    </section>
+
+    <!-- Live event log -->
+    <section class="console-sec">
+      <h3><svg class="ico"><use href="#i-activity"/></svg>Event log <button type="button" class="btn btn-ghost btn-xs" id="clearLog">Clear</button></h3>
+      <ol class="event-log" id="eventLog"></ol>
+    </section>
+
+    <!-- Guided scenarios: one source of input among several, outcome hidden by default -->
+    <details class="console-sec guided" id="guided">
+      <summary><svg class="ico"><use href="#i-book"/></svg>Guided scenarios <span class="muted small">13 scripted stories</span><svg class="ico chev"><use href="#i-chevron-down"/></svg></summary>
+      <label class="field">
+        <span data-i18n="sim.preset">Preset scenario</span>
+        <select id="preset"></select>
+      </label>
+      <label class="switch"><input type="checkbox" id="showExpected"><span>Show expected outcome before running</span></label>
+      <div id="presetInfo" class="preset-info" hidden></div>
+    </details>
+
+    <button type="button" class="btn btn-ghost btn-block" id="resetSim"><svg class="ico"><use href="#i-refresh"/></svg><span data-i18n="btn.reset">Reset</span></button>
   </aside>
 
   <!-- ============ Phone ============ -->
   <section class="phone-col" aria-label="Simulated UPI app">
     <div class="phone">
       <div class="phone-notch"></div>
-      <div class="phone-status"><span id="clock">14:00</span><span class="status-icons">▮▮▮ ◔</span></div>
+      <div class="phone-status"><span id="clock">14:00</span>
+        <span class="call-pill" id="callPill" hidden><svg class="ico"><use href="#i-phone"/></svg><b id="callPillTime">00:00</b></span>
+        <span class="status-icons"><svg class="ico"><use href="#i-signal"/></svg><svg class="ico"><use href="#i-wifi"/></svg><svg class="ico"><use href="#i-battery"/></svg></span></div>
       <div class="phone-appbar">
-        <span class="app-logo">₹</span><span data-i18n="app.demo_bank">DemoPay UPI</span>
-        <span class="shield-chip" title="SafePay Shield"><svg viewBox="0 0 32 32"><path d="M16 2 4 7v8c0 7.2 5.1 13.4 12 15 6.9-1.6 12-7.8 12-15V7z"/></svg> Shield</span>
+        <span class="app-logo"><svg class="ico"><use href="#i-rupee"/></svg></span><span data-i18n="app.demo_bank">DemoPay UPI</span>
+        <span class="shield-chip" title="SafePay Shield"><svg class="ico"><use href="#i-shield"/></svg> Shield</span>
       </div>
       <div class="phone-screen" id="screen"></div>
+      <div class="call-overlay" id="callOverlay" hidden></div>
       <div class="phone-foot" data-i18n="app.simulated">Simulated — no real money moved</div>
     </div>
   </section>
 
-  <!-- ============ Why? panel ============ -->
+  <!-- ============ Risk analysis ============ -->
   <section class="panel why" id="why" aria-labelledby="whyTitle">
     <div class="panel-head">
-      <h2 id="whyTitle" data-i18n="why.title">Why?</h2>
+      <div class="ph-title"><span class="ph-ico"><svg class="ico"><use href="#i-gauge"/></svg></span>
+        <div><h2 id="whyTitle">Risk analysis</h2><p class="muted small" data-i18n="why.title">Why?</p></div></div>
       <span class="sim-label" data-i18n="app.simulated">Simulated — no real money moved</span>
+    </div>
+    <div class="why-tabs" role="tablist" id="whyTabs">
+      <button type="button" role="tab" data-tab="explain"><svg class="ico"><use href="#i-info"/></svg>Explanation</button>
+      <button type="button" role="tab" data-tab="whatif"><svg class="ico"><use href="#i-scale"/></svg>What-if</button>
+      <button type="button" role="tab" data-tab="inputs"><svg class="ico"><use href="#i-layers"/></svg>Inputs &amp; sources</button>
     </div>
     <div id="whyBody"><p class="muted" data-i18n="why.empty">Make a payment to see why SafePay Shield decided what it did.</p></div>
   </section>
