@@ -62,3 +62,7 @@ def create_app(db_path=None) -> Flask:
 
 
 app = create_app()
+
+# Render free plan: ping ourselves so the service doesn't sleep (no-op locally).
+from safepay import keepalive  # noqa: E402
+keepalive.start()
