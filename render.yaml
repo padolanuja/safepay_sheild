@@ -1,0 +1,14 @@
+# Render Blueprint: https://render.com/docs/blueprint-spec
+services:
+  - type: web
+    name: safepay-shield
+    runtime: python
+    plan: free
+    # Install deps, then build the demo database (data/safepay.db is not in git).
+    buildCommand: pip install -r requirements.txt && python -m safepay.seed
+    # One worker keeps memory under the free plan's 512 MB (models load once per worker).
+    startCommand: gunicorn app:app --bind 0.0.0.0:$PORT --workers 1 --threads 4 --timeout 120
+    healthCheckPath: /
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.13.4

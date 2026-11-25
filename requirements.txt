@@ -11,4 +11,6 @@ shap>=0.46           # explanations; a documented fallback is used if it is miss
 matplotlib>=3.8      # report charts
 pytest>=8
 # REQUIRED: the saved coercion models (models/coercion_model_*.pkl) are XGBoost; without it they fail to load.
-xgboost>=2.0
+xgboost==3.4.1        # pinned to the version the models were saved with
+# production web server (Render)
+gunicorn>=23.0
